@@ -160,6 +160,17 @@
     .seg{display:flex;background:var(--thin);border-radius:16px;padding:6px;gap:6px;}
     .seg-btn{flex:1;padding:12px 8px;border-radius:12px;border:none;cursor:pointer;font-family:'DM Sans',sans-serif;font-size:14px;font-weight:600;transition:background .15s,color .15s;}
 
+    /* ── Low Signal Mode — kill all motion ──────────────────── */
+    html.low-signal *{
+      animation:none!important;
+      transition:none!important;
+    }
+    html.low-signal .material,
+    html.low-signal .glass{
+      backdrop-filter:none!important;
+      -webkit-backdrop-filter:none!important;
+    }
+
     .section-label{
       display:flex;align-items:center;gap:10px;
       padding:0;margin-bottom:10px;
@@ -479,19 +490,9 @@ const SL=({t})=>(
 const MapHero=({isDark,coords,activeLocation,lowSig,onDisableLowSig})=>{
   const mapRef=useRef(null), instRef=useRef(null), markerRef=useRef(null);
 
-  if(lowSig){
-    return(
-      <div style={{height:"220px",borderRadius:"20px",background:"linear-gradient(160deg,#1a2a4a,#0d1828)",display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"center",padding:"16px",border:"1px solid var(--border-light)"}}>
-        <div style={{marginBottom:"12px", opacity:0.6}}><I.Wifi0 s={32} c="var(--text-main)"/></div>
-        <span style={{fontSize:"13px",color:"var(--text-dim)",marginBottom:"16px"}}>Map unavailable in Low Signal mode</span>
-        <button onClick={onDisableLowSig} style={{padding:"10px 20px", borderRadius:"20px", background:"var(--thin)", border:"1px solid var(--border-light)", color:"var(--text-main)", fontSize:"12px", fontWeight:600, cursor:"pointer", transition:"background 0.2s"}}>
-          Turn Off Low Signal Mode
-        </button>
-      </div>
-    );
-  }
-
+  // ALL hooks must come before any conditional return — Rules of Hooks
   useEffect(()=>{
+    if(lowSig) return; // don't init map in low signal mode
     let attempts=0,fallbackTimer=null,tilesListener=null,retryTimer=null,unmounted=false;
     const tryInit= async ()=>{
       try{
@@ -508,7 +509,7 @@ const MapHero=({isDark,coords,activeLocation,lowSig,onDisableLowSig})=>{
         const map=new window.google.maps.Map(mapRef.current,{
           center:{lat,lng},zoom:13.5,
           tilt:window.innerWidth>768?67:0,heading:45,
-          disableDefaultUI:true, 
+          disableDefaultUI:true,
           gestureHandling:"none",
           zoomControl:false,
           scrollwheel:false,
@@ -531,11 +532,12 @@ const MapHero=({isDark,coords,activeLocation,lowSig,onDisableLowSig})=>{
       if(retryTimer) clearTimeout(retryTimer);
       if(fallbackTimer) clearTimeout(fallbackTimer);
       if(tilesListener){if(tilesListener.remove)tilesListener.remove();else if(window.google?.maps?.event)window.google.maps.event.removeListener(tilesListener);}
-      if(markerRef.current) markerRef.current.setMap(null); 
+      if(markerRef.current) markerRef.current.setMap(null);
     };
-  },[]);
+  },[lowSig]);
 
   useEffect(()=>{
+    if(lowSig) return;
     try{
       const map=instRef.current; if(!map) return;
       const lat=coords?.lat!=null?Number(coords.lat):11.5728, lng=coords?.lon!=null?Number(coords.lon):76.0808;
@@ -547,6 +549,7 @@ const MapHero=({isDark,coords,activeLocation,lowSig,onDisableLowSig})=>{
   },[coords?.lat,coords?.lon]);
 
   useEffect(()=>{
+    if(lowSig) return;
     try{
       const map=instRef.current;
       if(!map) return;
@@ -555,6 +558,26 @@ const MapHero=({isDark,coords,activeLocation,lowSig,onDisableLowSig})=>{
       if(center) map.setCenter(center);
     }catch(e){}
   },[isDark]);
+
+  // Conditional render AFTER all hooks
+  if(lowSig){
+    return(
+      <div style={{height:"220px",borderRadius:"20px",background:"linear-gradient(160deg,#1a2a4a,#0d1828)",display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"center",padding:"20px",border:"1px solid var(--border-light)",position:"relative"}}>
+        <button onClick={onDisableLowSig} style={{
+          position:"absolute",top:"14px",right:"14px",
+          width:"34px",height:"34px",borderRadius:"50%",
+          background:"var(--thin)",border:"1px solid var(--border-light)",
+          display:"flex",alignItems:"center",justifyContent:"center",
+          cursor:"pointer",flexShrink:0,lineHeight:0,padding:0,
+        }}>
+          <I.X s={16} c="var(--text-main)"/>
+        </button>
+        <div style={{marginBottom:"10px",opacity:0.5}}><I.Wifi0 s={28} c="var(--text-main)"/></div>
+        <span style={{fontSize:"13px",fontWeight:600,color:"var(--text-main)",marginBottom:"4px"}}>Low Signal Mode</span>
+        <span style={{fontSize:"11.5px",color:"var(--text-dim)",textAlign:"center",maxWidth:"200px",lineHeight:"1.5"}}>Map and animations disabled to save data</span>
+      </div>
+    );
+  }
 
   return(
     <div className="map-wrap">
@@ -1071,6 +1094,11 @@ const App=()=>{
   },[themePref,sysDark]);
 
   useEffect(()=>{
+    if(lowSig) document.documentElement.classList.add("low-signal");
+    else document.documentElement.classList.remove("low-signal");
+  },[lowSig]);
+
+  useEffect(()=>{
     const lock=settOpen||!onboarded;
     document.body.style.overflow=lock?"hidden":"";
     document.body.style.touchAction=lock?"none":"";
@@ -1142,7 +1170,7 @@ const App=()=>{
 
       <div style={{minHeight:"100dvh",padding:"16px",paddingTop:`calc(var(--sat,0px) + 16px)`,paddingBottom:`calc(var(--sab,0px) + 16px)`,display:"flex",flexDirection:"column",gap:"12px"}}>
         <SearchBar location={displayLocation} onSearch={handleSearch} onSettings={()=>setSettOpen(true)} loading={weatherLoading&&!!liveWeather}/>
-        
+
         {searchError&&(
           <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",padding:"10px 14px",borderRadius:"12px",background:"rgba(239,68,68,0.1)",border:"1px solid rgba(239,68,68,0.2)"}}>
             <span style={{fontSize:"12px",color:"#fca5a5"}}>🔍 {searchError}</span>
@@ -1153,23 +1181,52 @@ const App=()=>{
           <div style={{padding:"10px 14px",borderRadius:"12px",background:"rgba(239,68,68,0.08)",border:"1px solid rgba(239,68,68,0.15)",fontSize:"12px",color:"rgba(255,150,150,0.8)"}}>⚠️ {weatherError}</div>
         )}
 
-        <MapHero isDark={isDark} coords={coords} activeLocation={displayLocation} lowSig={lowSig} onDisableLowSig={() => setLowSig(false)}/>
-
-        <div key={`${coords.lat},${coords.lon}`} className={weatherLoading&&liveWeather?"updating":""} style={{display:"flex",flexDirection:"column",gap:"12px"}}>
-          <HeroCard cw={cw} location={displayLocation} imp={imp}/>
-          <StatGrid cw={cw} imp={imp}/>
-          <ExtMetrics cw={cw}/>
-          <HourlyScroll hourly={liveHourly} imp={imp}/>
-          <div style={{display:"flex",gap:"12px"}}>
-            <AQICard aqi={aqi}/>
-            <SunCard sun_moon={sun_moon}/>
+        {lowSig ? (
+          /* ── LOW SIGNAL LAYOUT: only the hero card + a subtle exit banner ── */
+          <div style={{display:"flex",flexDirection:"column",gap:"12px"}}>
+            <HeroCard cw={cw} location={displayLocation} imp={imp}/>
+            {/* Low signal exit banner */}
+            <div style={{
+              display:"flex",alignItems:"center",justifyContent:"space-between",
+              padding:"10px 14px",borderRadius:"14px",
+              background:isDark?"rgba(255,255,255,0.05)":"rgba(0,0,0,0.04)",
+              border:`1px solid ${isDark?"rgba(255,255,255,0.1)":"rgba(0,0,0,0.08)"}`,
+            }}>
+              <div style={{display:"flex",alignItems:"center",gap:"8px"}}>
+                <I.Wifi0 s={13} c="var(--text-dim)"/>
+                <span style={{fontSize:"12px",color:"var(--text-dim)",fontWeight:500}}>Low Signal Mode</span>
+              </div>
+              <button onClick={()=>setLowSig(false)} style={{
+                width:"28px",height:"28px",borderRadius:"50%",
+                background:isDark?"rgba(255,255,255,0.08)":"rgba(0,0,0,0.06)",
+                border:`1px solid ${isDark?"rgba(255,255,255,0.14)":"rgba(0,0,0,0.1)"}`,
+                display:"flex",alignItems:"center",justifyContent:"center",
+                cursor:"pointer",padding:0,lineHeight:0,flexShrink:0,
+              }}>
+                <I.X s={13} c="var(--text-main)"/>
+              </button>
+            </div>
           </div>
-          <DailyAccordion daily={liveDaily} imp={imp}/>
-        </div>
-
-        <div style={{textAlign:"center",fontSize:"10.5px",color:"var(--text-dim)",paddingTop:"4px"}}>
-          {geoState==="got"?`📍 ${coords?.lat?.toFixed(4)}°N ${coords?.lon?.toFixed(4)}°E · Live`:"Breeze · Open-Meteo · OSM"}
-        </div>
+        ) : (
+          /* ── NORMAL LAYOUT ── */
+          <>
+            <MapHero isDark={isDark} coords={coords} activeLocation={displayLocation} lowSig={lowSig} onDisableLowSig={()=>setLowSig(false)}/>
+            <div key={`${coords.lat},${coords.lon}`} className={weatherLoading&&liveWeather?"updating":""} style={{display:"flex",flexDirection:"column",gap:"12px"}}>
+              <HeroCard cw={cw} location={displayLocation} imp={imp}/>
+              <StatGrid cw={cw} imp={imp}/>
+              <ExtMetrics cw={cw}/>
+              <HourlyScroll hourly={liveHourly} imp={imp}/>
+              <div style={{display:"flex",gap:"12px"}}>
+                <AQICard aqi={aqi}/>
+                <SunCard sun_moon={sun_moon}/>
+              </div>
+              <DailyAccordion daily={liveDaily} imp={imp}/>
+            </div>
+            <div style={{textAlign:"center",fontSize:"10.5px",color:"var(--text-dim)",paddingTop:"4px"}}>
+              {geoState==="got"?`📍 ${coords?.lat?.toFixed(4)}°N ${coords?.lon?.toFixed(4)}°E · Live`:"Breeze · Open-Meteo · OSM"}
+            </div>
+          </>
+        )}
       </div>
 
       <SettingsPanel open={settOpen} onClose={()=>setSettOpen(false)}
