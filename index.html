@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+  <!-- Vercel Analytics -->
   <script src="/_vercel/analytics/script.js"></script>
   <meta charset="UTF-8"/>
   <meta name="viewport" content="width=device-width,initial-scale=1.0,viewport-fit=cover"/>
@@ -12,6 +13,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com"/>
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
   <link href="https://fonts.googleapis.com/css2?family=Urbanist:wght@200;300;400;500;600;700;800&family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500;9..40,600&display=swap" rel="stylesheet"/>
+  
   <script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
   <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
   <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
@@ -24,7 +26,7 @@
     input,textarea{-webkit-user-select:text;user-select:text;}
     html,body{margin:0;padding:0;height:100%;overscroll-behavior-y:none;}
 
-    /* ── iOS material tokens — dark (default) ────────────────── */
+    /* ── Material tokens ── */
     :root{
       --ultra-thin: rgba(255,255,255,0.04);
       --thin:       rgba(255,255,255,0.08);
@@ -32,10 +34,6 @@
       --thick:      rgba(255,255,255,0.22);
       --border-light: rgba(255,255,255,0.22);
       --border-dark:  rgba(0,0,0,0.08);
-      --glass-1: rgba(255,255,255,0.04);
-      --glass-2: rgba(255,255,255,0.08);
-      --glass-3: rgba(255,255,255,0.14);
-      --glass-border: rgba(255,255,255,0.22);
       --text-main: #ffffff;
       --text-sub:  rgba(255,255,255,0.7);
       --text-dim:  rgba(255,255,255,0.45);
@@ -53,10 +51,6 @@
       --thick:      rgba(255,255,255,0.38);
       --border-light: rgba(0,0,0,0.07);
       --border-dark:  rgba(0,0,0,0.07);
-      --glass-1: rgba(255,255,255,0.25);
-      --glass-2: rgba(255,255,255,0.45);
-      --glass-3: rgba(255,255,255,0.65);
-      --glass-border: rgba(0,0,0,0.07);
       --text-main: #0b1a35;
       --text-sub:  rgba(11,26,53,0.75);
       --text-dim:  rgba(11,26,53,0.5);
@@ -85,6 +79,7 @@
     }
     #root{min-height:100%;}
 
+    /* ── Components ── */
     .material,.glass{
       backdrop-filter: blur(30px) saturate(1.8);
       -webkit-backdrop-filter: blur(30px) saturate(1.8);
@@ -97,34 +92,15 @@
     }
     .material:active,.glass:active{transform:scale(0.985);}
     .material::before,.glass::before{
-      content:"";
-      position:absolute;
-      inset:0;
-      border-radius:inherit;
+      content:""; position:absolute; inset:0; border-radius:inherit;
       background:linear-gradient(180deg,rgba(255,255,255,0.35),transparent 40%);
-      opacity:0.25;
-      pointer-events:none;
-      z-index:0;
+      opacity:0.25; pointer-events:none; z-index:0;
     }
     .material>*,.glass>*{position:relative;z-index:1;}
-    .m-ultra,.glass-1{ background:var(--ultra-thin); }
-    .m-thin,.glass-2{  background:var(--thin); }
-    .m-regular,.glass-3{ background:var(--regular); }
+    .m-ultra{ background:var(--ultra-thin); }
+    .m-thin{  background:var(--thin); }
+    .m-regular{ background:var(--regular); }
     .m-thick{          background:var(--thick); }
-    @media(max-width:768px){
-      .material,.glass{backdrop-filter:blur(22px) saturate(1.6);-webkit-backdrop-filter:blur(22px) saturate(1.6);}
-    }
-    [data-theme="light"] .material,
-    [data-theme="light"] .glass{
-      backdrop-filter: blur(36px) saturate(1.8);
-      -webkit-backdrop-filter: blur(36px) saturate(1.8);
-      border: 1px solid var(--border-dark);
-      box-shadow: inset 0 1px 0 rgba(255,255,255,0.6), 0 2px 10px rgba(0,0,0,0.07);
-    }
-    .panel-in{background:rgba(20,25,40,0.88);}
-    [data-theme="light"] .panel-in{
-      background: rgba(245,247,252,0.94) !important;
-    }
 
     .map-wrap{position:relative;border-radius:20px;overflow:hidden;height:220px;flex-shrink:0;}
     .map-canvas{position:absolute;inset:0;width:100%;height:100%;opacity:0;transition:opacity 1s ease;}
@@ -136,45 +112,25 @@
     @keyframes spin{to{transform:rotate(360deg)}}
     .spin{animation:spin .8s linear infinite;}
 
-    button{line-height:0;}
     .tog{width:42px;height:24px;border-radius:12px;position:relative;cursor:pointer;flex-shrink:0;transition:background .2s;}
     .tog-k{position:absolute;top:3px;width:18px;height:18px;border-radius:50%;background:#fff;box-shadow:0 1px 4px rgba(0,0,0,.4);transition:transform .22s cubic-bezier(.34,1.56,.64,1);}
+
+    .seg{display:flex;background:var(--thin);border-radius:16px;padding:6px;gap:6px;}
+    .seg-btn{flex:1;padding:12px 8px;border-radius:12px;border:none;cursor:pointer;font-family:'DM Sans',sans-serif;font-size:14px;font-weight:600;transition:background .15s,color .15s;}
+
+    .srch::placeholder{color:var(--text-dim);}
+    .srch::-webkit-search-cancel-button,.srch::-webkit-search-decoration{-webkit-appearance:none;}
+
+    @keyframes slideIn{from{transform:translateX(100%)}to{transform:none}}
+    .panel-in{animation:slideIn .32s cubic-bezier(.32,.72,0,1) both;}
 
     .acc-body{display:grid;grid-template-rows:0fr;transition:grid-template-rows .35s ease,opacity .25s ease;opacity:0;}
     .acc-body.open{grid-template-rows:1fr;opacity:1;}
     .acc-inner{min-height:0;overflow:hidden;}
 
-    .srch::placeholder{color:var(--text-dim);}
-    .srch::-webkit-search-cancel-button,.srch::-webkit-search-decoration{-webkit-appearance:none;}
-
-    .updating{filter:blur(4px);opacity:0.5;pointer-events:none;transition:filter .25s,opacity .25s;}
-
-    @keyframes fadeUp{from{opacity:0;transform:translateY(24px)}to{opacity:1;transform:none}}
-    @keyframes fadeOut{from{opacity:1}to{opacity:0}}
-    .ob-in{animation:fadeUp .5s ease both;}
-    .ob-out{animation:fadeOut .35s ease forwards;}
-
-    @keyframes slideIn{from{transform:translateX(100%)}to{transform:none}}
-    .panel-in{animation:slideIn .32s cubic-bezier(.32,.72,0,1) both;}
-
-    .seg{display:flex;background:var(--thin);border-radius:16px;padding:6px;gap:6px;}
-    .seg-btn{flex:1;padding:12px 8px;border-radius:12px;border:none;cursor:pointer;font-family:'DM Sans',sans-serif;font-size:14px;font-weight:600;transition:background .15s,color .15s;}
-
-    .section-label{
-      display:flex;align-items:center;gap:10px;
-      padding:0;margin-bottom:10px;
-    }
-    .section-label-pill{
-      display:inline-flex;align-items:center;gap:6px;flex-shrink:0;
-      padding:4px 11px;
-      background:var(--thin);
-      border:1px solid var(--border-light);
-      border-radius:20px;
-    }
-    .section-label-line{
-      flex:1;height:1px;
-      background:linear-gradient(90deg,var(--border-light) 0%,transparent 100%);
-    }
+    .section-label{ display:flex;align-items:center;gap:10px; padding:0;margin-bottom:10px; }
+    .section-label-pill{ display:inline-flex;align-items:center;gap:6px;flex-shrink:0; padding:4px 11px; background:var(--thin); border:1px solid var(--border-light); border-radius:20px; }
+    .section-label-line{ flex:1;height:1px; background:linear-gradient(90deg,var(--border-light) 0%,transparent 100%); }
   </style>
 </head>
 <body>
@@ -184,7 +140,7 @@
 const {useState,useEffect,useRef,useCallback,useMemo} = React;
 
 /* ═══════════════════════════════════════════════════════
-   DYNAMIC MAPS LOADER (Secure Vercel Setup)
+   DYNAMIC MAPS LOADER
 ═══════════════════════════════════════════════════════ */
 let _mapPromise = null;
 const loadGoogleMaps = async () => {
@@ -194,17 +150,17 @@ const loadGoogleMaps = async () => {
   _mapPromise = new Promise(async (resolve, reject) => {
     try {
       const response = await fetch('/api/get-map-key');
+      if (!response.ok) throw new Error('API route failed');
       const data = await response.json();
       
       const script = document.createElement('script');
       script.src = `https://maps.googleapis.com/maps/api/js?key=${data.key}&v=beta`;
-      script.async = true;
-      script.defer = true;
+      script.async = true; script.defer = true;
       script.onload = resolve;
       script.onerror = reject;
       document.head.appendChild(script);
     } catch (error) {
-      console.error("Failed to load Google Maps API key:", error);
+      console.error("Maps Loader Error:", error);
       reject(error);
     }
   });
@@ -212,7 +168,7 @@ const loadGoogleMaps = async () => {
 };
 
 /* ═══════════════════════════════════════════════════════
-   UNIT HELPERS
+   HELPERS & CONSTANTS
 ═══════════════════════════════════════════════════════ */
 const cvtT = (v,i) => { if(v==="--"||v==null) return "--"; return i ? Math.round(v*9/5+32) : v; };
 const cvtW = (v,i) => { if(v==="--"||v==null) return "--"; return i ? Math.round(v*.621371) : v; };
@@ -221,794 +177,161 @@ const tU = i => i?"°F":"°C";
 const wU = i => i?"mph":"km/h";
 const vU = i => i?"mi":"km";
 
-/* ═══════════════════════════════════════════════════════
-   THEME HELPERS
-═══════════════════════════════════════════════════════ */
-const resolveTheme = (pref,sysDark) => {
-  if(pref==="dark")  return "dark";
-  if(pref==="light") return "light";
-  return sysDark ? "dark" : "light";
-};
+const resolveTheme = (pref,sysDark) => pref==="dark"? "dark": pref==="light"? "light": (sysDark?"dark":"light");
 
-const getWeatherTint = (condition) => {
-  if(!condition) return null;
-  const c = condition.toLowerCase();
-  if(c.includes("thunder"))                    return "rgba(120,100,255,0.20)";
-  if(c.includes("rain")||c.includes("drizzle"))return "rgba(70,130,255,0.16)";
-  if(c.includes("snow"))                       return "rgba(190,230,255,0.14)";
-  if(c.includes("fog"))                        return "rgba(180,190,200,0.14)";
-  if(c.includes("clear"))                      return "rgba(255,195,100,0.14)";
-  if(c.includes("cloud"))                      return "rgba(160,180,200,0.10)";
-  return null;
-};
-
-/* ═══════════════════════════════════════════════════════
-   MAP CONSTANTS (Official Google Night Mode preset)
-═══════════════════════════════════════════════════════ */
 const DARK_MAP_STYLES = [
   { elementType: "geometry", stylers: [{ color: "#242f3e" }] },
   { elementType: "labels.text.stroke", stylers: [{ color: "#242f3e" }] },
   { elementType: "labels.text.fill", stylers: [{ color: "#746855" }] },
-  { featureType: "administrative.locality", elementType: "labels.text.fill", stylers: [{ color: "#d59563" }] },
-  { featureType: "poi", elementType: "labels.text.fill", stylers: [{ color: "#d59563" }] },
-  { featureType: "poi.park", elementType: "geometry", stylers: [{ color: "#263c3f" }] },
-  { featureType: "poi.park", elementType: "labels.text.fill", stylers: [{ color: "#6b9a76" }] },
   { featureType: "road", elementType: "geometry", stylers: [{ color: "#38414e" }] },
-  { featureType: "road", elementType: "geometry.stroke", stylers: [{ color: "#212a37" }] },
-  { featureType: "road", elementType: "labels.text.fill", stylers: [{ color: "#9ca5b3" }] },
-  { featureType: "road.highway", elementType: "geometry", stylers: [{ color: "#746855" }] },
-  { featureType: "road.highway", elementType: "geometry.stroke", stylers: [{ color: "#1f2835" }] },
-  { featureType: "road.highway", elementType: "labels.text.fill", stylers: [{ color: "#f3d19c" }] },
-  { featureType: "transit", elementType: "geometry", stylers: [{ color: "#2f3948" }] },
-  { featureType: "transit.station", elementType: "labels.text.fill", stylers: [{ color: "#d59563" }] },
-  { featureType: "water", elementType: "geometry", stylers: [{ color: "#17263c" }] },
-  { featureType: "water", elementType: "labels.text.fill", stylers: [{ color: "#515c6d" }] },
-  { featureType: "water", elementType: "labels.text.stroke", stylers: [{ color: "#17263c" }] }
+  { featureType: "water", elementType: "geometry", stylers: [{ color: "#17263c" }] }
 ];
 
-/* ═══════════════════════════════════════════════════════
-   GEOCODER
-═══════════════════════════════════════════════════════ */
-const _fetchWithTimeout = async (url, opts={}, ms=7000) => {
-  const ctrl = new AbortController();
-  const timer = setTimeout(() => ctrl.abort(), ms);
-  try { return await fetch(url, {...opts, signal:ctrl.signal}); }
-  finally { clearTimeout(timer); }
-};
-
-const geocodeWithOSM = async (query) => {
-  if(!query?.trim()) throw new Error("Empty search query");
-  const q = query.trim();
-  try {
-    const r = await _fetchWithTimeout(`https://geocoding-api.open-meteo.com/v1/search?name=${encodeURIComponent(q)}&count=1&language=en&format=json`,{},6000);
-    if(r.status===429) throw new Error("rate_limit");
-    if(r.ok){
-      const d = await r.json();
-      const v = d?.results?.[0];
-      if(v) return {lat:Number(v.latitude),lon:Number(v.longitude),village:(v.name||q).trim(),district:v.admin1||"",state:v.country||"",display:(v.name||q).trim()};
-    }
-  } catch(e){ if(e.message==="rate_limit") throw new Error("Rate limit reached. Please wait a moment."); }
-  try {
-    const r2 = await _fetchWithTimeout(`https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(q)}&format=json&limit=1&addressdetails=1`,{headers:{"Accept-Language":"en","User-Agent":"BreezeWeatherApp/12"}},7000);
-    if(r2.status===429) throw new Error("Rate limit (Nominatim). Please wait.");
-    if(r2.ok){
-      const d2 = await r2.json();
-      if(d2?.length>0){
-        const row=d2[0], addr=row.address||{};
-        const name=addr.city||addr.town||addr.village||addr.municipality||addr.county||row.display_name.split(",")[0].trim()||q;
-        return {lat:parseFloat(row.lat),lon:parseFloat(row.lon),village:name,district:addr.state_district||addr.county||addr.state||"",state:addr.country||"",display:name};
-      }
-    }
-  } catch(e){ if(e.message.startsWith("Rate")) throw e; }
-  throw new Error(`"${q}" not found. Try a nearby city.`);
-};
-
-/* ═══════════════════════════════════════════════════════
-   WMO CODE MAPPER
-═══════════════════════════════════════════════════════ */
-const DAYS = ["Sunday","Monday","Tuesday","Wednesday","Thursday","Friday","Saturday"];
-const getWeatherDetails = (code) => {
-  const c = Number(code??0);
-  if(c===0)          return {icon:"☀️", condition:"Clear Sky",         isStorm:false};
-  if(c===1)          return {icon:"🌤️",condition:"Mostly Clear",       isStorm:false};
-  if(c===2)          return {icon:"⛅",  condition:"Partly Cloudy",     isStorm:false};
-  if(c===3)          return {icon:"☁️",  condition:"Overcast",          isStorm:false};
-  if(c===45||c===48) return {icon:"🌫️",condition:"Foggy",              isStorm:false};
-  if(c>=51&&c<=57)   return {icon:"🌦️",condition:"Drizzle",            isStorm:true };
-  if(c>=61&&c<=67)   return {icon:"🌧️",condition:"Rain",               isStorm:true };
-  if(c>=71&&c<=77)   return {icon:"🌨️",condition:"Snow",               isStorm:true };
-  if(c>=80&&c<=82)   return {icon:"🌧️",condition:"Rain Showers",       isStorm:true };
-  if(c===85||c===86) return {icon:"🌨️",condition:"Snow Showers",       isStorm:true };
-  if(c===95)         return {icon:"⛈️",  condition:"Thunderstorm",      isStorm:true };
-  if(c===96||c===99) return {icon:"⛈️",  condition:"Heavy Thunderstorm",isStorm:true };
-  return {icon:"🌡️",condition:"Unknown",isStorm:false};
-};
-
-/* ═══════════════════════════════════════════════════════
-   FETCH WEATHER
-═══════════════════════════════════════════════════════ */
-const fetchWeather = async (lat, lon) => {
-  try {
-    const wUrl = `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&current=temperature_2m,relative_humidity_2m,apparent_temperature,precipitation,weather_code,wind_speed_10m,surface_pressure,dew_point_2m,uv_index,visibility&hourly=temperature_2m,precipitation,weather_code,wind_speed_10m&daily=weather_code,temperature_2m_max,temperature_2m_min,uv_index_max,precipitation_sum,sunrise,sunset,wind_speed_10m_max&timezone=auto&forecast_days=7`;
-    const aqUrl = `https://air-quality-api.open-meteo.com/v1/air-quality?latitude=${lat}&longitude=${lon}&current=european_aqi,pm10,pm2_5`;
-    const wCtrl=new AbortController(), aqCtrl=new AbortController();
-    const wT=setTimeout(()=>wCtrl.abort(),10000), aqT=setTimeout(()=>aqCtrl.abort(),8000);
-    let wRes,aqRes;
-    try {
-      [wRes,aqRes] = await Promise.all([
-        fetch(wUrl,{signal:wCtrl.signal}),
-        fetch(aqUrl,{signal:aqCtrl.signal}).catch(e=>{return null;}),
-      ]);
-    } finally { clearTimeout(wT); clearTimeout(aqT); }
-    if(!wRes.ok) throw new Error(`Weather API ${wRes.status}`);
-    const [wData,aqData] = await Promise.all([wRes.json(), aqRes?.json().catch(()=>null)]);
-
-    const c=wData.current||{};
-    const wd=getWeatherDetails(c.weather_code);
-    const nr=v=>v!=null?Math.round(v):"--";
-    const nf=(v,d=1)=>v!=null?Number(v.toFixed(d)):"--";
-
-    const currentWeather = {
-      temperature:nr(c.temperature_2m), feelslike:nr(c.apparent_temperature),
-      humidity:nr(c.relative_humidity_2m), precipitation:nf(c.precipitation),
-      windspeed:nr(c.wind_speed_10m), pressure:nr(c.surface_pressure),
-      dewPoint:nr(c.dew_point_2m), uv_index:nr(c.uv_index),
-      visibility:c.visibility!=null?nr(c.visibility/1000):"--", 
-      icon:wd.icon, condition:wd.condition, isStorm:wd.isStorm, conditionCode:wd.isStorm?"storm":"clear",
-    };
-
-    const hTimes=wData.hourly?.time||[];
-    const targetLocalTime = c.time || new Date().toISOString().slice(0,16);
-    const targetHour = targetLocalTime.slice(0,13); 
-    let si=hTimes.findIndex(t=>t.slice(0,13)>=targetHour); if(si<0)si=0;
-    
-    const hourly=hTimes.slice(si,si+24).map((t,i)=>{
-      const idx=si+i, hwd=getWeatherDetails(wData.hourly.weather_code?.[idx]), hr=parseInt(t.slice(11,13),10);
-      return {time:String(hr).padStart(2,"0")+":00",temp:nr(wData.hourly.temperature_2m?.[idx]),icon:hwd.icon,condition:hwd.condition,precipitation:nf(wData.hourly.precipitation?.[idx]),windspeed:nr(wData.hourly.wind_speed_10m?.[idx])};
-    });
-
-    const dTimes=wData.daily?.time||[];
-    const daily=dTimes.map((t,i)=>{
-      const [yy,mm,dd] = t.split("-").map(Number);
-      const d = new Date(yy, mm-1, dd); 
-      const dwd=getWeatherDetails(wData.daily.weather_code?.[i]);
-      const srRaw=(wData.daily.sunrise?.[i]||"").slice(11,16)||"06:00";
-      const ssRaw=(wData.daily.sunset?.[i]||"").slice(11,16)||"18:00";
-      const toMin=s=>{try{const[h,m]=(s||"00:00").split(":").map(Number);return h*60+m;}catch{return 0;}};
-      const dl=((toMin(ssRaw)-toMin(srRaw))/60).toFixed(1);
-      const precip=nf(wData.daily.precipitation_sum?.[i]);
-      const dayHours=[];
-      hTimes.forEach((ht,hi)=>{
-        if(!ht.startsWith(t))return;
-        const hr=parseInt(ht.slice(11,13),10);
-        if(![6,9,12,15,18,21].includes(hr))return;
-        const hwd2=getWeatherDetails(wData.hourly.weather_code?.[hi]);
-        dayHours.push({time:String(hr).padStart(2,"0")+":00",temp:nr(wData.hourly.temperature_2m?.[hi]),icon:hwd2.icon,precipitation:nf(wData.hourly.precipitation?.[hi])});
-      });
-      return {
-        name:i===0?"Today":DAYS[d.getDay()],
-        lo:nr(wData.daily.temperature_2m_min?.[i]),hi:nr(wData.daily.temperature_2m_max?.[i]),
-        icon:dwd.icon,condition:dwd.condition,
-        windSpeed:nr(wData.daily.wind_speed_10m_max?.[i]),
-        humidity:nr(c.relative_humidity_2m),uvIndex:nr(wData.daily.uv_index_max?.[i]),
-        pressure:nr(c.surface_pressure),dewPoint:nr(c.dew_point_2m),
-        precipitation:precip,
-        summary:dwd.condition+(precip>0?` · ${precip} mm expected.`:" · Dry conditions."),
-        hours:dayHours,sunrise:srRaw,sunset:ssRaw,daylight_hours:parseFloat(dl),
-      };
-    });
-
-    const aq=aqData?.current||{};
-    const aqi={value:aq.european_aqi!=null?Math.round(aq.european_aqi):null,pollutant:(aq.pm2_5!=null&&aq.pm10!=null)?(aq.pm2_5>=aq.pm10?"PM2.5":"PM10"):"AQI"};
-    const d0=daily[0]||{};
-    const sun_moon={sunrise:d0.sunrise||"06:00",sunset:d0.sunset||"18:00",daylight_hours:d0.daylight_hours||12,moon_emoji:"🌙"};
-    const tzParts=(wData.timezone||"Asia/Kolkata").split("/");
-    const locationFromApi={village:(tzParts[1]||"Location").replace(/_/g," "),district:tzParts[0]||"",state:""};
-    return {currentWeather,hourly,daily,aqi,sun_moon,locationFromApi};
-  } catch(e){ return null; }
-};
-
-/* ═══════════════════════════════════════════════════════
-   AQI
-═══════════════════════════════════════════════════════ */
-const AQI_L=[
-  {max:50,label:"Good",color:"#22c55e"},{max:100,label:"Moderate",color:"#eab308"},
-  {max:150,label:"Sensitive",color:"#f97316"},{max:200,label:"Unhealthy",color:"#ef4444"},
-  {max:300,label:"Very Unhealthy",color:"#a855f7"},{max:500,label:"Hazardous",color:"#7f1d1d"},
-];
-const aqiLvl = v => AQI_L.find(l=>v<=l.max)||AQI_L[5];
-
-/* ═══════════════════════════════════════════════════════
-   ICONS
-═══════════════════════════════════════════════════════ */
 const I={
   Search:({s=16,c="currentColor"})=><svg width={s} height={s} viewBox="0 0 24 24" fill="none" stroke={c} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>,
   Cog:({s=18,c="currentColor"})=><svg width={s} height={s} viewBox="0 0 24 24" fill="none" stroke={c} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>,
   X:({s=16,c="currentColor"})=><svg width={s} height={s} viewBox="0 0 24 24" fill="none" stroke={c} strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M18 6L6 18M6 6l12 12"/></svg>,
-  Chev:({s=14,c="currentColor"})=><svg width={s} height={s} viewBox="0 0 24 24" fill="none" stroke={c} strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="9 18 15 12 9 6"/></svg>,
   Up:({s=13,c="currentColor"})=><svg width={s} height={s} viewBox="0 0 24 24" fill="none" stroke={c} strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="18 15 12 9 6 15"/></svg>,
   Pin:({s=14,c="currentColor"})=><svg width={s} height={s} viewBox="0 0 24 24" fill="none" stroke={c} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>,
   Bell:({s=15,c="currentColor"})=><svg width={s} height={s} viewBox="0 0 24 24" fill="none" stroke={c} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>,
-  Leaf:({s=14,c="currentColor"})=><svg width={s} height={s} viewBox="0 0 24 24" fill="none" stroke={c} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M11 20A7 7 0 0 1 9.8 6.1C15.5 5 17 4.48 19 2c1 2 2 4.18 2 8 0 5.5-4.78 10-10 10z"/><path d="M2 21c0-3 1.85-5.36 5.08-6C9.5 14.52 12 13 13 12"/></svg>,
   Wifi0:({s=14,c="currentColor"})=><svg width={s} height={s} viewBox="0 0 24 24" fill="none" stroke={c} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="1" y1="1" x2="23" y2="23"/><path d="M16.72 11.06A10.94 10.94 0 0 1 19 12.55"/><path d="M5 12.55a10.94 10.94 0 0 1 5.17-2.39"/><path d="M10.71 5.05A16 16 0 0 1 22.56 9"/><path d="M1.42 9a15.91 15.91 0 0 1 4.7-2.88"/><path d="M8.53 16.11a6 6 0 0 1 6.95 0"/><line x1="12" y1="20" x2="12.01" y2="20"/></svg>,
-  Sun2:({s=14,c="currentColor"})=><svg width={s} height={s} viewBox="0 0 24 24" fill="none" stroke={c} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="5"/><path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/></svg>,
+  Sun2:({s=14,c="currentColor"})=><svg width={s} height={s} viewBox="0 0 24 24" fill="none" stroke={c} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="5"/><path d="M12 1v2M12 21v2"/><path d="M4.22 4.22l1.42 1.42"/><path d="M18.36 18.36l1.42 1.42"/><path d="M1 12h2"/><path d="M21 12h2"/><path d="M4.22 19.78l1.42-1.42"/><path d="M18.36 5.64l1.42-1.42"/></svg>,
 };
 
 /* ═══════════════════════════════════════════════════════
-   PRIMITIVES
+   COMPONENTS
 ═══════════════════════════════════════════════════════ */
-const M=({children,level="regular",style={},onClick})=>(
-  <div className={`material m-${level}`} style={{position:"relative",...style}} onClick={onClick}>{children}</div>
-);
-const G=({children,level=2,style={},onClick})=>{
-  const lmap={1:"ultra",2:"regular",3:"thick"};
-  return <M level={lmap[level]||"regular"} style={style} onClick={onClick}>{children}</M>;
-};
-
-const Toggle=({on,onChange})=>(
-  <div className="tog" style={{background:on?"#48C6EF":"var(--thin)"}} onClick={()=>onChange(!on)}>
-    <div className="tog-k" style={{transform:on?"translateX(21px)":"translateX(3px)"}}/>
-  </div>
-);
-
-const SegCtrl=({options,value,onChange})=>(
-  <div className="seg">
-    {options.map(o=>(
-      <button key={o.id} className="seg-btn"
-        style={{background:value===o.id?"var(--regular)":"transparent",color:value===o.id?"var(--text-main)":"var(--text-sub)"}}
-        onClick={()=>onChange(o.id)}>
-        {o.icon&&<span style={{marginRight:"4px"}}>{o.icon}</span>}{o.label}
-      </button>
-    ))}
-  </div>
-);
-
-const SL=({t})=>(
-  <div className="section-label">
-    <div className="section-label-pill">
-      <div style={{width:"5px",height:"5px",borderRadius:"50%",background:"#48C6EF",boxShadow:"0 0 5px rgba(72,198,239,0.7)",flexShrink:0}}/>
-      <span style={{fontSize:"10px",fontWeight:700,letterSpacing:"0.1em",textTransform:"uppercase",color:"var(--text-sub)"}}>{t}</span>
-    </div>
-    <div className="section-label-line"/>
-  </div>
-);
-
-/* ═══════════════════════════════════════════════════════
-   MAP HERO
-═══════════════════════════════════════════════════════ */
-const MapHero=({isDark,coords,activeLocation,lowSig,onDisableLowSig})=>{
+const MapHero=({isDark,coords,activeLocation,lowSig,onExitLowSig})=>{
   const mapRef=useRef(null), instRef=useRef(null), markerRef=useRef(null);
 
   if(lowSig){
     return(
-      <div style={{height:"220px",borderRadius:"20px",background:"linear-gradient(160deg,#1a2a4a,#0d1828)",display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"center",padding:"16px",border:"1px solid var(--border-light)"}}>
-        <div style={{marginBottom:"12px", opacity:0.6}}><I.Wifi0 s={32} c="var(--text-main)"/></div>
-        <span style={{fontSize:"13px",color:"var(--text-dim)",marginBottom:"16px"}}>Map unavailable in Low Signal mode</span>
-        <button onClick={onDisableLowSig} style={{padding:"10px 20px", borderRadius:"20px", background:"var(--thin)", border:"1px solid var(--border-light)", color:"var(--text-main)", fontSize:"12px", fontWeight:600, cursor:"pointer", transition:"background 0.2s"}}>
-          Turn Off Low Signal Mode
-        </button>
+      <div style={{height:"220px",borderRadius:"20px",background:"linear-gradient(160deg,#1a2a4a,#0d1828)",display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"center",padding:"24px",border:"1px solid var(--border-light)"}}>
+        <div style={{opacity:0.4,marginBottom:"12px"}}><I.Wifi0 s={32}/></div>
+        <span style={{fontSize:"13px",color:"var(--text-dim)",textAlign:"center",marginBottom:"16px"}}>Map unavailable in Low Signal mode</span>
+        <button onClick={onExitLowSig} style={{padding:"10px 22px",borderRadius:"20px",background:"var(--thin)",border:"1px solid var(--border-light)",color:"var(--text-main)",fontSize:"12px",fontWeight:700,cursor:"pointer"}}>Exit Low Signal Mode</button>
       </div>
     );
   }
 
   useEffect(()=>{
-    let attempts=0,fallbackTimer=null,tilesListener=null,retryTimer=null,unmounted=false;
+    let unmounted=false;
     const tryInit= async ()=>{
-      try{
-        if(unmounted||!mapRef.current) return;
-        if(!window.google || !window.google.maps) {
-          await loadGoogleMaps().catch(()=>{});
-        }
-        if(!window.google||!window.google.maps||typeof window.google.maps.Map!=="function"){
-          if(++attempts<100) retryTimer=setTimeout(tryInit,100);
-          return;
-        }
+      if(unmounted||!mapRef.current) return;
+      try {
+        if(!window.google || !window.google.maps) await loadGoogleMaps();
         if(instRef.current) return;
         const lat=coords?.lat!=null?Number(coords.lat):11.5728, lng=coords?.lon!=null?Number(coords.lon):76.0808;
         const map=new window.google.maps.Map(mapRef.current,{
-          center:{lat,lng},zoom:13.5,
-          tilt:window.innerWidth>768?67:0,heading:45,
-          disableDefaultUI:true, 
-          gestureHandling:"none",
-          zoomControl:false,
-          scrollwheel:false,
-          keyboardShortcuts:false,clickableIcons:false,
+          center:{lat,lng},zoom:13.5, tilt:45, disableDefaultUI:true, gestureHandling:"none", scrollwheel:false,
           styles:isDark?DARK_MAP_STYLES:[],
         });
         instRef.current=map;
         markerRef.current=new window.google.maps.Marker({
-          position:{lat,lng},map,title:activeLocation?.village||"Breeze",
-          animation:(window.google.maps.Animation&&window.google.maps.Animation.DROP)||null,
-          icon:{path:window.google.maps.SymbolPath.CIRCLE,scale:8,fillColor:"#48C6EF",fillOpacity:1,strokeColor:"white",strokeWeight:2.5},
+          position:{lat,lng},map,icon:{path:window.google.maps.SymbolPath.CIRCLE,scale:8,fillColor:"#48C6EF",fillOpacity:1,strokeColor:"white",strokeWeight:2.5},
         });
-        tilesListener=map.addListener("tilesloaded",()=>{if(!unmounted&&mapRef.current) mapRef.current.classList.add("loaded");});
-        fallbackTimer=setTimeout(()=>{if(!unmounted&&mapRef.current) mapRef.current.classList.add("loaded");},3000);
-      }catch(e){}
+        map.addListener("tilesloaded",()=>mapRef.current?.classList.add("loaded"));
+      } catch(e){}
     };
     tryInit();
-    return()=>{
-      unmounted=true;
-      if(retryTimer) clearTimeout(retryTimer);
-      if(fallbackTimer) clearTimeout(fallbackTimer);
-      if(tilesListener){if(tilesListener.remove)tilesListener.remove();else if(window.google?.maps?.event)window.google.maps.event.removeListener(tilesListener);}
-      if(markerRef.current) markerRef.current.setMap(null); 
-    };
+    return()=>{ unmounted=true; if(markerRef.current) markerRef.current.setMap(null); };
   },[]);
 
   useEffect(()=>{
-    try{
-      const map=instRef.current; if(!map) return;
-      const lat=coords?.lat!=null?Number(coords.lat):11.5728, lng=coords?.lon!=null?Number(coords.lon):76.0808;
-      map.panTo({lat,lng});
-      const _tiltTimer=setTimeout(()=>{if(instRef.current&&typeof instRef.current.setTilt==="function") instRef.current.setTilt(window.innerWidth>768?67:0);},600);
-      if(markerRef.current){markerRef.current.setPosition({lat,lng});markerRef.current.setTitle(activeLocation?.village||"Breeze");}
-      return()=>clearTimeout(_tiltTimer);
-    }catch(e){}
-  },[coords?.lat,coords?.lon]);
+    if(instRef.current){
+      const lat=Number(coords.lat), lng=Number(coords.lon);
+      instRef.current.panTo({lat,lng});
+      markerRef.current?.setPosition({lat,lng});
+    }
+  },[coords.lat,coords.lon]);
 
   useEffect(()=>{
-    try{
-      const map=instRef.current;
-      if(!map) return;
-      map.setOptions({styles:isDark?DARK_MAP_STYLES:[]});
-      const center=map.getCenter();
-      if(center) map.setCenter(center);
-    }catch(e){}
+    if(instRef.current) instRef.current.setOptions({styles:isDark?DARK_MAP_STYLES:[]});
   },[isDark]);
 
-  return(
-    <div className="map-wrap">
-      <div ref={mapRef} className="map-canvas" style={{filter:isDark?"brightness(0.95)":"brightness(0.95)"}}/>
-    </div>
-  );
+  return <div className="map-wrap"><div ref={mapRef} className="map-canvas" style={{filter:isDark?"brightness(0.9)":"brightness(0.95)"}}/></div>;
 };
 
-/* ═══════════════════════════════════════════════════════
-   SEARCH BAR
-═══════════════════════════════════════════════════════ */
-const SearchBar=({location,onSearch,onSettings,loading})=>{
-  const [q,setQ]=useState("");
-  const submit=e=>{e.preventDefault();const v=q.trim();if(!v)return;onSearch(v);setQ("");};
-  return(
-    <form onSubmit={submit} style={{display:"flex",alignItems:"center",gap:"0",overflow:"hidden"}} className="material m-regular">
-      <div style={{padding:"0 12px",flexShrink:0,display:"flex",alignItems:"center"}}>
-        {loading
-          ? <div className="spin" style={{width:"14px",height:"14px",borderRadius:"50%",border:"2px solid rgba(72,198,239,.3)",borderTopColor:"#48C6EF"}}/>
-          : <I.Search s={14} c="var(--text-sub)"/>}
-      </div>
-      <input type="search" className="srch" value={q} onChange={e=>setQ(e.target.value)}
-        placeholder={location?.display||location?.village||"Search location…"}
-        enterKeyHint="search" autoComplete="off" spellCheck="false"
-        style={{flex:1,padding:"12px 0",background:"transparent",border:"none",outline:"none",color:"var(--text-main)",fontSize:"14px",fontFamily:"'DM Sans',sans-serif"}}/>
-      <button type="button" onClick={onSettings}
-        style={{padding:"12px 14px",background:"none",border:"none",borderLeft:"1px solid var(--border-light)",cursor:"pointer",display:"flex",alignItems:"center",flexShrink:0}}>
-        <I.Cog s={17} c="var(--text-sub)"/>
-      </button>
-    </form>
-  );
-};
-
-/* ═══════════════════════════════════════════════════════
-   HERO CARD
-═══════════════════════════════════════════════════════ */
-const HeroCard=({cw,location,imp})=>(
-  <M level="thick" style={{padding:"20px",background:`linear-gradient(180deg,${getWeatherTint(cw.condition)||"var(--thick)"},var(--regular))`}}>
-    <div style={{display:"flex",justifyContent:"space-between",alignItems:"flex-start"}}>
-      <div>
-        <div style={{display:"flex",alignItems:"center",gap:"5px",marginBottom:"12px"}}>
-          <I.Pin s={12} c="var(--text-sub)"/>
-          <span style={{fontSize:"13px",color:"var(--text-sub)",fontWeight:400}}>
-            {location?.village||"—"}{location?.district?`, ${location.district}`:""}
-          </span>
-        </div>
-        <div style={{display:"flex",alignItems:"flex-start",gap:"2px"}}>
-          <span style={{fontFamily:"'Urbanist',sans-serif",fontSize:"clamp(64px,18vw,88px)",fontWeight:200,lineHeight:.85,letterSpacing:"-3px",color:"var(--text-main)"}}>
-            {cvtT(cw.temperature,imp)}
-          </span>
-          <span style={{fontFamily:"'Urbanist',sans-serif",fontSize:"22px",fontWeight:300,color:"var(--text-sub)",marginTop:"10px"}}>{tU(imp)}</span>
-        </div>
-        <div style={{marginTop:"10px"}}>
-          <div style={{fontSize:"16px",fontWeight:600,color:"var(--text-main)"}}>{cw.condition}</div>
-          <div style={{fontSize:"12px",color:"var(--text-sub)",marginTop:"3px"}}>
-            Feels {cvtT(cw.feelslike,imp)}{tU(imp)}
-            {cw.precipitation>0?` · ${cw.precipitation}mm`:""}
-          </div>
-        </div>
-      </div>
-      <span style={{fontSize:"clamp(48px,13vw,64px)",lineHeight:1,filter:"drop-shadow(0 2px 8px rgba(0,0,0,.3))"}}>{cw.icon}</span>
-    </div>
-  </M>
-);
-
-/* ═══════════════════════════════════════════════════════
-   STAT GRID — 2x2
-═══════════════════════════════════════════════════════ */
-const StatGrid=({cw,imp})=>{
-  const stats=[
-    {label:"Wind",value:`${cvtW(cw.windspeed,imp)}`,unit:wU(imp)},
-    {label:"Humidity",value:cw.humidity,unit:"%"},
-    {label:"UV Index",value:cw.uv_index,unit:""},
-    {label:"Visibility",value:cvtV(cw.visibility,imp),unit:vU(imp)},
-  ];
-  return(
-    <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:"10px"}}>
-      {stats.map(({label,value,unit},i)=>(
-        <G key={i} level={2} style={{padding:"14px 16px"}}>
-          <div style={{fontSize:"11px",color:"var(--text-sub)",marginBottom:"6px",textTransform:"uppercase",letterSpacing:"0.06em"}}>{label}</div>
-          <div style={{fontFamily:"'Urbanist',sans-serif",fontSize:"22px",fontWeight:600,color:"var(--text-main)",lineHeight:1}}>
-            {value}<span style={{fontSize:"12px",color:"var(--text-sub)",marginLeft:"3px",fontFamily:"'DM Sans',sans-serif"}}>{unit}</span>
-          </div>
-        </G>
-      ))}
-    </div>
-  );
-};
-
-/* ═══════════════════════════════════════════════════════
-   EXTENDED METRICS
-═══════════════════════════════════════════════════════ */
-const ExtMetrics=({cw})=>{
-  const rows=[
-    {label:"Pressure",value:cw.pressure,unit:"hPa",note:cw.pressure!=="--"?(cw.pressure>1009?"Stable":cw.pressure>999?"Normal":"Low"):""},
-    {label:"Dew Point",value:cw.dewPoint,unit:"°C",note:cw.dewPoint!=="--"?(cw.dewPoint>20?"Muggy":cw.dewPoint>13?"Comfortable":"Dry"):""},
-  ];
-  return(
-    <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:"10px"}}>
-      {rows.map(({label,value,unit,note},i)=>(
-        <G key={i} level={2} style={{padding:"14px 16px"}}>
-          <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:"6px"}}>
-            <span style={{fontSize:"11px",color:"var(--text-sub)",textTransform:"uppercase",letterSpacing:"0.06em"}}>{label}</span>
-            {note&&<span style={{fontSize:"9px",background:"var(--thin)",borderRadius:"8px",padding:"2px 6px",color:"var(--text-sub)"}}>{note}</span>}
-          </div>
-          <div style={{fontFamily:"'Urbanist',sans-serif",fontSize:"22px",fontWeight:600,color:"var(--text-main)",lineHeight:1}}>
-            {value}<span style={{fontSize:"12px",color:"var(--text-sub)",marginLeft:"3px",fontFamily:"'DM Sans',sans-serif"}}>{unit}</span>
-          </div>
-        </G>
-      ))}
-    </div>
-  );
-};
-
-/* ═══════════════════════════════════════════════════════
-   HOURLY SCROLL
-═══════════════════════════════════════════════════════ */
-const HourlyScroll=({hourly,imp})=>{
-  if(!hourly?.length) return null;
-  return(
-    <div>
-      <SL t="Next 24 Hours"/>
-      <div className="no-scroll" style={{display:"flex",gap:"8px",overflowX:"auto",paddingBottom:"2px"}}>
-        {hourly.map((h,i)=>(
-          <G key={i} level={i===0?2:1} style={{minWidth:"64px",padding:"10px 8px",textAlign:"center",flexShrink:0,border:i===0?"1px solid rgba(72,198,239,0.7)":undefined}}>
-            <div style={{fontSize:"11px",color:i===0?"#48C6EF":"var(--text-sub)",marginBottom:"6px"}}>{i===0?"Now":h.time}</div>
-            <div style={{fontSize:"18px",marginBottom:"5px"}}>{h.icon}</div>
-            <div style={{fontFamily:"'Urbanist',sans-serif",fontSize:"14px",fontWeight:600,color:"var(--text-main)"}}>{cvtT(h.temp,imp)}°</div>
-            {h.precipitation>0&&<div style={{fontSize:"9px",color:"rgba(100,200,255,0.8)",marginTop:"3px"}}>{h.precipitation}mm</div>}
-          </G>
-        ))}
-      </div>
-    </div>
-  );
-};
-
-/* ═══════════════════════════════════════════════════════
-   AQI CARD
-═══════════════════════════════════════════════════════ */
-const AQICard=({aqi})=>{
-  const aiqVal=aqi.value??0;
-  const lv=aqiLvl(aiqVal);
-  const [w,setW]=useState(0);
-  useEffect(()=>{const t=setTimeout(()=>setW(Math.min((aiqVal/500)*100,100)),200);return()=>clearTimeout(t);},[aiqVal]);
-  return(
-    <G style={{padding:"16px",flex:1}}>
-      <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:"12px"}}>
-        <div>
-          <div style={{fontSize:"11px",color:"var(--text-sub)",textTransform:"uppercase",letterSpacing:"0.06em",marginBottom:"4px"}}>Air Quality</div>
-          <div style={{fontFamily:"'Urbanist',sans-serif",fontSize:"28px",fontWeight:700,color:"var(--text-main)",lineHeight:1}}>{aiqVal!=null?aiqVal:"—"}</div>
-          <div style={{fontSize:"11px",color:"var(--text-sub)",marginTop:"2px"}}>{aqi.pollutant}</div>
-        </div>
-        <span style={{fontSize:"11px",fontWeight:700,padding:"5px 11px",borderRadius:"20px",background:`${lv.color}22`,color:lv.color,border:`1px solid ${lv.color}44`}}>{lv.label}</span>
-      </div>
-      <div style={{height:"4px",borderRadius:"2px",background:"var(--thin)",overflow:"hidden"}}>
-        <div style={{height:"100%",borderRadius:"2px",width:`${w}%`,background:"linear-gradient(90deg,#22c55e,#eab308,#ef4444,#a855f7)",transition:"width .9s ease"}}/>
-      </div>
-    </G>
-  );
-};
-
-/* ═══════════════════════════════════════════════════════
-   SUN CARD
-═══════════════════════════════════════════════════════ */
-const SunCard=({sun_moon})=>{
-  const {sunrise,sunset,daylight_hours}=sun_moon;
-  return(
-    <G style={{padding:"16px",flex:1}}>
-      <div style={{fontSize:"11px",color:"var(--text-sub)",textTransform:"uppercase",letterSpacing:"0.06em",marginBottom:"12px"}}>Sun & Moon</div>
-      <div style={{display:"flex",flexDirection:"column",gap:"10px"}}>
-        {[{emoji:"🌅",label:"Sunrise",val:sunrise},{emoji:"🌇",label:"Sunset",val:sunset}].map(({emoji,label,val})=>(
-          <div key={label} style={{display:"flex",alignItems:"center",justifyContent:"space-between"}}>
-            <div style={{display:"flex",alignItems:"center",gap:"7px"}}>
-              <span style={{fontSize:"16px"}}>{emoji}</span>
-              <span style={{fontSize:"11px",color:"var(--text-sub)"}}>{label}</span>
-            </div>
-            <span style={{fontFamily:"'Urbanist',sans-serif",fontSize:"16px",fontWeight:600,color:"var(--text-main)"}}>{val}</span>
-          </div>
-        ))}
-        <div style={{borderTop:"1px solid var(--border-light)",paddingTop:"10px",display:"flex",justifyContent:"space-between",alignItems:"center"}}>
-          <span style={{fontSize:"11px",color:"var(--text-sub)"}}>Daylight</span>
-          <span style={{fontFamily:"'Urbanist',sans-serif",fontSize:"15px",fontWeight:600,color:"#48C6EF"}}>{daylight_hours}h</span>
-        </div>
-      </div>
-    </G>
-  );
-};
-
-/* ═══════════════════════════════════════════════════════
-   DAILY ACCORDION
-═══════════════════════════════════════════════════════ */
-const DailyAccordion=({daily,imp})=>{
-  const [open,setOpen]=useState(null);
-  if(!daily?.length) return null;
-  return(
-    <div>
-      <SL t="7-Day Forecast"/>
-      <M level="thin">
-        {daily.map((day,i)=>{
-          const isOpen=open===i;
-          return(
-            <div key={i} style={{borderBottom:i<daily.length-1?"1px solid var(--border-light)":"none"}}>
-              <button onClick={()=>setOpen(p=>p===i?null:i)}
-                style={{display:"flex",alignItems:"center",width:"100%",padding:"13px 16px",background:"none",border:"none",cursor:"pointer",gap:"0",textAlign:"left"}}>
-                <span style={{fontFamily:"'DM Sans',sans-serif",fontSize:"13px",fontWeight:i===0?700:500,color:i===0?"#48C6EF":"var(--text-main)",width:"86px",flexShrink:0}}>{day.name}</span>
-                <span style={{fontSize:"18px",flexShrink:0}}>{day.icon}</span>
-                <span style={{fontSize:"11.5px",color:"var(--text-sub)",flex:1,textAlign:"center",padding:"0 8px",overflow:"hidden",whiteSpace:"nowrap",textOverflow:"ellipsis"}}>{day.condition}</span>
-                <div style={{display:"flex",gap:"8px",alignItems:"center",flexShrink:0,marginRight:"8px"}}>
-                  <span style={{fontFamily:"'Urbanist',sans-serif",fontSize:"14px",color:"var(--text-sub)"}}>{cvtT(day.lo,imp)}{tU(imp)}</span>
-                  <span style={{fontFamily:"'Urbanist',sans-serif",fontSize:"14px",fontWeight:600,color:"var(--text-main)"}}>{cvtT(day.hi,imp)}{tU(imp)}</span>
-                </div>
-                <div style={{transition:"transform .25s ease",transform:isOpen?"rotate(0)":"rotate(180deg)",flexShrink:0}}>
-                  <I.Up s={13} c="var(--text-sub)"/>
-                </div>
-              </button>
-
-              <div className={`acc-body${isOpen?" open":""}`}>
-                <div className="acc-inner" style={{background:"transparent"}}>
-                  {day.hours?.length>0&&(
-                    <div className="no-scroll" style={{display:"flex",gap:"7px",overflowX:"auto",padding:"10px 16px 6px"}}>
-                      {day.hours.map((h,j)=>(
-                        <div key={j} style={{display:"flex",flexDirection:"column",alignItems:"center",gap:"4px",minWidth:"50px",padding:"8px 6px",borderRadius:"12px",background:"transparent",border:"1px solid var(--border-light)",flexShrink:0}}>
-                          <span style={{fontSize:"10px",color:"var(--text-sub)"}}>{h.time}</span>
-                          <span style={{fontSize:"16px"}}>{h.icon}</span>
-                          <span style={{fontFamily:"'Urbanist',sans-serif",fontSize:"13px",fontWeight:600,color:"var(--text-main)"}}>{cvtT(h.temp,imp)}°</span>
-                          {h.precipitation>0&&<span style={{fontSize:"9px",color:"rgba(100,200,255,0.8)"}}>{h.precipitation}mm</span>}
-                        </div>
-                      ))}
-                    </div>
-                  )}
-                  <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:"7px",padding:"6px 16px 14px"}}>
-                    {[
-                      {label:"UV Index",value:day.uvIndex,note:day.uvIndex!=="--"?(day.uvIndex>=8?"Very High":day.uvIndex>=6?"High":"Moderate"):""},
-                      {label:"Wind",value:`${cvtW(day.windSpeed,imp)} ${wU(imp)}`,note:""},
-                      {label:"Humidity",value:day.humidity!=null?`${day.humidity}%`:"—",note:""},
-                      {label:"Precipitation",value:`${day.precipitation} mm`,note:""},
-                    ].map(({label,value,note},j)=>(
-                      <div key={j} style={{padding:"10px 12px",borderRadius:"12px",background:"transparent",border:"1px solid var(--border-light)"}}>
-                        <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:"5px"}}>
-                          <span style={{fontSize:"10px",color:"var(--text-sub)",textTransform:"uppercase",letterSpacing:"0.06em"}}>{label}</span>
-                          {note&&<span style={{fontSize:"9px",color:"var(--text-dim)"}}>{note}</span>}
-                        </div>
-                        <div style={{fontFamily:"'Urbanist',sans-serif",fontSize:"17px",fontWeight:600,color:"var(--text-main)"}}>{value}</div>
-                      </div>
-                    ))}
-                  </div>
-                  <div style={{margin:"0 16px 12px",padding:"10px 12px",borderRadius:"10px",background:"rgba(72,198,239,0.08)",border:"1px solid rgba(72,198,239,0.18)"}}>
-                    <div style={{fontSize:"12px",color:"var(--text-sub)",lineHeight:"1.6"}}>{day.summary}</div>
-                  </div>
-                </div>
-              </div>
-            </div>
-          );
-        })}
-      </M>
-    </div>
-  );
-};
-
-/* ═══════════════════════════════════════════════════════
-   PANEL HEADER
-═══════════════════════════════════════════════════════ */
-const PanelHeader=({title,subtitle,onBack,backIcon})=>(
-  <div style={{
-    padding:"calc(var(--sat,0px) + 24px) 24px 0",
-    display:"flex",alignItems:"center",justifyContent:"space-between",
-    marginBottom:"24px",
-  }}>
-    <div style={{display:"flex",flexDirection:"column",justifyContent:"center"}}>
-      <div style={{fontFamily:"'Urbanist',sans-serif",fontSize:"26px",fontWeight:800,
-        lineHeight:"1.1",letterSpacing:"-0.02em",color:"var(--text-main)"}}>
-        {title}
-      </div>
-      {subtitle&&(
-        <div style={{fontSize:"13px",color:"var(--text-sub)",marginTop:"4px"}}>{subtitle}</div>
-      )}
-    </div>
-    <button onClick={onBack} style={{
-      width:"34px",height:"34px",borderRadius:"50%",background:"var(--thin)",
-      border:"1px solid var(--border-light)",display:"flex",alignItems:"center",
-      justifyContent:"center",cursor:"pointer",flexShrink:0,lineHeight:0,
-      padding:0
-    }}>
-      {backIcon||<I.X s={16} c="var(--text-main)"/>}
+const PanelHeader=({title,onBack})=>(
+  <div style={{padding:"calc(var(--sat,0px) + 24px) 24px 0",display:"flex",alignItems:"center",justifyContent:"space-between",marginBottom:"24px"}}>
+    <div style={{fontFamily:"'Urbanist',sans-serif",fontSize:"26px",fontWeight:800,color:"var(--text-main)"}}>{title}</div>
+    <button onClick={onBack} style={{width:"34px",height:"34px",borderRadius:"50%",background:"var(--thin)",border:"1px solid var(--border-light)",display:"flex",alignItems:"center",justifyContent:"center",cursor:"pointer"}}>
+      <I.X s={16} c="var(--text-main)"/>
     </button>
   </div>
 );
-
-/* ═══════════════════════════════════════════════════════
-   SETTINGS PANEL
-═══════════════════════════════════════════════════════ */
-const THEME_OPTS=[{id:"light",icon:"☀️",label:"Light"},{id:"system",icon:"⚙️",label:"System"},{id:"dark",icon:"🌙",label:"Dark"}];
 
 const SettingsPanel=({open,onClose,imp,setImp,lowSig,setLowSig,themePref,setThemePref,notifPerm,onRequestNotif,geoState})=>{
   const [showLegal,setShowLegal]=useState(false);
   if(!open) return null;
 
-  const Row=({Icon,title,sub,right,last=false})=>(
-    <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",padding:"14px 0",borderBottom:last?"none":"1px solid var(--divider)"}}>
+  const Row=({Icon,title,sub,right})=>(
+    <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",padding:"14px 0",borderBottom:"1px solid var(--divider)"}}>
       <div style={{display:"flex",alignItems:"center",gap:"12px"}}>
-        {Icon&&<div style={{width:"30px",height:"30px",borderRadius:"8px",background:"transparent",display:"flex",alignItems:"center",justifyContent:"center",flexShrink:0}}><Icon s={14} c="var(--text-sub)"/></div>}
+        {Icon&&<Icon s={14} c="var(--text-sub)"/>}
         <div>
           <div style={{fontSize:"14px",fontWeight:500,color:"var(--text-main)"}}>{title}</div>
-          {sub&&<div style={{fontSize:"11.5px",color:"var(--text-sub)",marginTop:"1px"}}>{sub}</div>}
+          {sub&&<div style={{fontSize:"11.5px",color:"var(--text-sub)",marginTop:"2px"}}>{sub}</div>}
         </div>
       </div>
       {right}
     </div>
   );
-  const Cat=({c})=>(
-    <div style={{fontSize:"10px",fontWeight:700,color:"var(--text-dim)",letterSpacing:"0.12em",textTransform:"uppercase",marginBottom:"4px",marginTop:"22px"}}>{c}</div>
+
+  const Category=({t})=>(
+    <div style={{fontSize:"10px",fontWeight:700,color:"var(--text-dim)",letterSpacing:"0.12em",textTransform:"uppercase",marginTop:"22px",marginBottom:"4px"}}>{t}</div>
   );
 
   return(
     <>
-      <div onClick={onClose} style={{position:"fixed",inset:0,background:"rgba(0,0,0,0.55)",backdropFilter:"blur(8px)",WebkitBackdropFilter:"blur(8px)",zIndex:150}}/>
-      <div className="panel-in" style={{position:"fixed",top:0,right:0,bottom:0,width:"min(360px,94vw)",background:"rgba(20,25,40,0.88)",borderLeft:"1px solid var(--border-light)",zIndex:200,overflowY:"auto",paddingBottom:"max(24px,var(--sab,24px))"}}>
-        {!showLegal&&<>
-        <PanelHeader title="Settings" subtitle="Breeze v0.12.0" onBack={onClose}/>
-        <div style={{padding:"0 24px"}}>
-          
-          <Cat c="Appearance"/>
-          <div style={{padding:"12px 0",borderBottom:"1px solid var(--divider)"}}>
-            <div style={{fontSize:"13px",fontWeight:500,color:"var(--text-main)",marginBottom:"12px"}}>Theme</div>
-            <SegCtrl options={THEME_OPTS} value={themePref} onChange={setThemePref}/>
-          </div>
-          
-          <Cat c="Units"/>
-          <Row Icon={I.Sun2} title="Measurement" sub={imp?"Imperial — °F, mph":"Metric — °C, km/h"}
-            right={<div style={{display:"flex",alignItems:"center",gap:"8px"}}><span style={{fontSize:"11px",color:"var(--text-sub)"}}>{imp?"°F":"°C"}</span><Toggle on={imp} onChange={setImp}/></div>}/>
-          
-          <Cat c="Connectivity"/>
-          <Row Icon={I.Wifi0} title="Low Signal Mode" sub="Disables map, strips animations"
-            right={<Toggle on={lowSig} onChange={setLowSig}/>} />
-            
-          <Cat c="System Status"/>
-          <Row Icon={I.Pin} title="Location Permission" 
-            sub={geoState==="got" ? "Location active" : "Location denied — using default"}
-            right={<div style={{width:"8px",height:"8px",borderRadius:"50%",background:geoState==="got"?"#22c55e":"#ef4444"}}/>} />
-            
-          <Cat c="Notifications"/>
-          <Row Icon={I.Bell} title="Severe Weather Alerts"
-            sub={notifPerm==="granted"?"Active":notifPerm==="denied"?"Blocked — check browser settings":"Tap to enable"}
-            right={notifPerm==="granted"
-              ? <div style={{width:"7px",height:"7px",borderRadius:"50%",background:"#22c55e"}}/>
-              : notifPerm==="denied"
-                ? <span style={{fontSize:"11px",color:"#ef4444"}}>Blocked</span>
-                : <button onClick={onRequestNotif} style={{padding:"6px 12px",borderRadius:"16px",border:"none",cursor:"pointer",fontSize:"12px",fontWeight:600,background:"#48C6EF",color:"var(--text-main)"}}>Enable</button>
-            } />
-            
-          <Cat c="About"/>
-          <div onClick={()=>setShowLegal(true)} style={{cursor:"pointer"}}>
-            <Row Icon={I.Leaf} title="Data Sources & Legal" sub="Open-Meteo · OSM · Google Maps"
-              right={<I.Chev s={13} c="#48C6EF"/>} last/>
-          </div>
-
-        </div>
-        </>}
-      </div>
-
-      {showLegal&&(
-        <div className="panel-in" style={{position:"fixed",top:0,right:0,bottom:0,width:"min(360px,94vw)",background:"rgba(20,25,40,0.88)",borderLeft:"1px solid var(--border-light)",zIndex:300,overflowY:"auto",paddingBottom:"max(24px,var(--sab,24px))"}}>
-          <PanelHeader title="Legal & Data Sources" onBack={()=>setShowLegal(false)}/>
-          <div style={{padding:"0 24px"}}>
-            {[
-              {title:"Weather Forecasts",src:"Open-Meteo",url:"https://open-meteo.com",license:"CC BY 4.0",desc:"Free weather API — no API key required."},
-              {title:"Geocoding",src:"OpenStreetMap Nominatim",url:"https://nominatim.openstreetmap.org",license:"ODbL",desc:"© OpenStreetMap contributors."},
-              {title:"3D Maps",src:"Google Maps Platform",url:"https://maps.google.com",license:"Google Terms",desc:"WebGL vector maps."},
-              {title:"Air Quality",src:"Open-Meteo AQI",url:"https://open-meteo.com/en/docs/air-quality-api",license:"CC BY 4.0",desc:"European AQI via Copernicus CAMS."},
-            ].map(({title,src,url,license,desc},i)=>(
-              <div key={i} style={{padding:"14px 0",borderBottom:"1px solid var(--divider)"}}>
-                <div style={{fontSize:"10px",fontWeight:700,color:"var(--text-dim)",letterSpacing:"0.08em",textTransform:"uppercase",marginBottom:"4px"}}>{title}</div>
-                <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",marginBottom:"4px"}}>
-                  <a href={url} target="_blank" rel="noopener noreferrer" style={{fontSize:"14px",fontWeight:600,color:"#48C6EF",textDecoration:"none"}}>{src}</a>
-                  <span style={{fontSize:"9px",fontWeight:600,padding:"2px 7px",borderRadius:"10px",background:"rgba(72,198,239,0.1)",color:"#48C6EF",border:"1px solid rgba(72,198,239,0.2)"}}>{license}</span>
-                </div>
-                <div style={{fontSize:"12px",color:"var(--text-sub)",lineHeight:"1.5"}}>{desc}</div>
+      <div onClick={onClose} style={{position:"fixed",inset:0,background:"rgba(0,0,0,0.55)",backdropFilter:"blur(8px)",zIndex:150}}/>
+      <div className="panel-in" style={{position:"fixed",top:0,right:0,bottom:0,width:"min(360px,94vw)",background:"rgba(20,25,40,0.88)",borderLeft:"1px solid var(--border-light)",zIndex:200,overflowY:"auto"}}>
+        {!showLegal ? (
+          <div style={{paddingBottom:"40px"}}>
+            <PanelHeader title="Settings" onBack={onClose}/>
+            <div style={{padding:"0 24px"}}>
+              
+              <Category t="Appearance"/>
+              <div style={{padding:"12px 0",borderBottom:"1px solid var(--divider)"}}>
+                <div style={{fontSize:"13px",fontWeight:500,color:"var(--text-main)",marginBottom:"12px"}}>Theme</div>
+                <SegCtrl options={THEME_OPTS} value={themePref} onChange={setThemePref}/>
               </div>
-            ))}
-          </div>
-        </div>
-      )}
-    </>
-  );
-};
 
-/* ═══════════════════════════════════════════════════════
-   NOTIFICATION HOOK
-═══════════════════════════════════════════════════════ */
-const useWeatherAlerts=(alerts,scene)=>{
-  const notifiedRef=useRef(new Set());
-  useEffect(()=>{
-    if(!alerts?.length||!("Notification" in window)||Notification.permission!=="granted") return;
-    const timer=setTimeout(()=>{
-      alerts.forEach(a=>{
-        const key=`${scene}:${a.id}`;
-        if(notifiedRef.current.has(key)) return;
-        notifiedRef.current.add(key);
-        new Notification(a.title,{body:a.desc,icon:"/icon-192.png",tag:`breeze-${a.id}`});
-      });
-    },1500);
-    return()=>clearTimeout(timer);
-  },[scene]);
-};
+              <Category t="Units"/>
+              <Row Icon={I.Sun2} title="Measurement" sub={imp?"Imperial — °F, mph":"Metric — °C, km/h"}
+                right={<Toggle on={imp} onChange={setImp}/>}/>
 
-/* ═══════════════════════════════════════════════════════
-   WELCOME OVERLAY
-═══════════════════════════════════════════════════════ */
-const WelcomeOverlay=({onComplete})=>{
-  const [exiting,setExiting]=useState(false);
-  const [step,setStep]=useState("idle");
+              <Category t="Connectivity"/>
+              <Row Icon={I.Wifi0} title="Low Signal Mode" sub="Strips map and heavy animations"
+                right={<Toggle on={lowSig} onChange={setLowSig}/>}/>
 
-  const go=async()=>{
-    setStep("requesting");
-    await new Promise(resolve=>{
-      if(!navigator.geolocation){resolve();return;}
-      navigator.geolocation.getCurrentPosition(resolve,resolve,{timeout:8000});
-    });
-    if("Notification" in window&&Notification.permission==="default"){
-      try{await Notification.requestPermission();}catch{}
-    }
-    try{localStorage.setItem("breeze_onboarded","true");}catch{}
-    setExiting(true);
-    setTimeout(()=>onComplete(),400);
-  };
+              <Category t="System Status"/>
+              <Row Icon={I.Pin} title="Location Status" sub={geoState==="got"?"Active and synced":"Denied — using default"}
+                right={<div style={{width:"8px",height:"8px",borderRadius:"50%",background:geoState==="got"?"#22c55e":"#ef4444"}}/>}/>
 
-  return(
-    <div className={exiting?"ob-out":""} style={{position:"fixed",inset:0,zIndex:400,display:"flex",alignItems:"center",justifyContent:"center",background:"rgba(5,8,20,0.85)",backdropFilter:"blur(24px)",WebkitBackdropFilter:"blur(24px)",padding:"24px"}}>
-      <div className="ob-in glass" style={{width:"100%",maxWidth:"340px",padding:"36px 28px 28px",textAlign:"center",borderColor:"rgba(72,198,239,0.2)"}}>
-        <div style={{fontSize:"44px",marginBottom:"20px"}}>🌤️</div>
-        <div style={{fontFamily:"'Urbanist',sans-serif",fontSize:"24px",fontWeight:800,color:"var(--text-main)",letterSpacing:"-0.02em",marginBottom:"10px"}}>Welcome to Breeze</div>
-        <div style={{fontSize:"14px",color:"var(--text-sub)",lineHeight:"1.65",marginBottom:"28px"}}>
-          For hyper-local weather and alerts, Breeze needs your{" "}
-          <span style={{color:"var(--text-main)"}}>location and notification</span> permissions.
-        </div>
-        <div style={{display:"flex",gap:"8px",justifyContent:"center",marginBottom:"24px",flexWrap:"wrap"}}>
-          {[["📍","Location"],["🔔","Alerts"]].map(([icon,label])=>(
-            <div key={label} style={{display:"flex",alignItems:"center",gap:"5px",padding:"5px 11px",borderRadius:"20px",background:"rgba(72,198,239,0.08)",border:"1px solid rgba(72,198,239,0.18)"}}>
-              <span style={{fontSize:"12px"}}>{icon}</span>
-              <span style={{fontSize:"11.5px",color:"var(--text-main)",fontWeight:500}}>{label}</span>
+              <Category t="Notification"/>
+              <Row Icon={I.Bell} title="Weather Alerts" sub={notifPerm==="granted"?"Notifications active":"Permissions required"}
+                right={notifPerm!=="granted" && <button onClick={onRequestNotif} style={{padding:"6px 12px",borderRadius:"16px",background:"#48C6EF",border:"none",color:"#fff",fontSize:"12px",fontWeight:600}}>Enable</button>}/>
+
+              <Category t="About"/>
+              <div onClick={()=>setShowLegal(true)} style={{cursor:"pointer"}}>
+                <Row title="Legal & Data Sources" sub="Open-Meteo · Google Maps · OSM"
+                  right={<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3"><polyline points="9 18 15 12 9 6"/></svg>}/>
+              </div>
             </div>
-          ))}
-        </div>
-        <button onClick={go} disabled={step==="requesting"}
-          style={{width:"100%",padding:"14px",borderRadius:"14px",border:"none",cursor:step==="requesting"?"default":"pointer",fontFamily:"'Urbanist',sans-serif",fontSize:"15px",fontWeight:700,background:step==="requesting"?"rgba(72,198,239,0.2)":"#48C6EF",color:step==="requesting"?"rgba(72,198,239,0.7)":"white",display:"flex",alignItems:"center",justifyContent:"center",gap:"8px"}}>
-          {step==="requesting"&&<div className="spin" style={{width:"15px",height:"15px",borderRadius:"50%",border:"2px solid rgba(72,198,239,.3)",borderTopColor:"#48C6EF"}}/>}
-          {step==="requesting"?"Requesting…":"Grant Permissions"}
-        </button>
-        <button onClick={()=>{try{localStorage.setItem("breeze_onboarded","true");}catch{}onComplete();}}
-          style={{background:"none",border:"none",cursor:"pointer",fontSize:"12px",color:"var(--text-dim)",marginTop:"14px",padding:"4px"}}>
-          Skip for now
-        </button>
+          </div>
+        ) : (
+          <div>
+            <PanelHeader title="Legal Info" onBack={()=>setShowLegal(false)}/>
+            <div style={{padding:"0 24px"}}>
+               <div style={{fontSize:"13px", color:"var(--text-sub)", lineHeight:1.6}}>
+                  Breeze is an experimental weather dashboard. Data provided by Open-Meteo, Air Quality by Copernicus, and Geocoding by OpenStreetMap. All map technologies powered by Google.
+               </div>
+            </div>
+          </div>
+        )}
       </div>
-    </div>
+    </>
   );
 };
 
@@ -1016,23 +339,10 @@ const WelcomeOverlay=({onComplete})=>{
    ROOT APP
 ═══════════════════════════════════════════════════════ */
 const App=()=>{
-  const [onboarded,setOnboarded]=useState(()=>{
-    try{
-      const s=localStorage.getItem("breeze_onboarded")==="true";
-      if(!s) return false;
-      const ok="Notification" in window?Notification.permission!=="default":true;
-      return ok;
-    }catch{return false;}
-  });
-  
+  const [onboarded,setOnboarded]=useState(()=>localStorage.getItem("bz_onboarded")==="true");
   const [imp,setImp]=useState(()=>localStorage.getItem("bz_imp")==="true");
   const [themePref,setThemePref]=useState(()=>localStorage.getItem("bz_theme")||"system");
-  const [lowSig,setLowSig]=useState(()=>{
-    const saved = localStorage.getItem("bz_lowsig");
-    if(saved !== null) return saved==="true";
-    try{return(navigator.hardwareConcurrency||4)<4;}catch{return false;}
-  });
-  
+  const [lowSig,setLowSig]=useState(()=>localStorage.getItem("bz_lowsig")==="true");
   const [sysDark,setSysDark]=useState(()=>window.matchMedia("(prefers-color-scheme:dark)").matches);
   const [settOpen,setSettOpen]=useState(false);
   const [notifPerm,setNotifPerm]=useState(()=>"Notification" in window?Notification.permission:"denied");
@@ -1040,15 +350,8 @@ const App=()=>{
   const [coords,setCoords]=useState({lat:11.5728,lon:76.0808});
   const [geoState,setGeoState]=useState("pending");
   const [activeLocation,setActiveLocation]=useState(null);
-
-  const [liveWeather,setLiveWeather]=useState(null);
-  const [liveHourly,setLiveHourly]=useState([]);
-  const [liveDaily,setLiveDaily]=useState([]);
-  const [liveAqi,setLiveAqi]=useState(null);
-  const [liveSunMoon,setLiveSunMoon]=useState(null);
-  const [weatherLoading,setWeatherLoading]=useState(true);
-  const [weatherError,setWeatherError]=useState(null);
-  const [searchError,setSearchError]=useState(null);
+  const [weatherData,setWeatherData]=useState({cw:null,hourly:[],daily:[],aqi:null,sun:null});
+  const [loading,setLoading]=useState(true);
 
   useEffect(()=>{ localStorage.setItem("bz_imp",imp); },[imp]);
   useEffect(()=>{ localStorage.setItem("bz_theme",themePref); },[themePref]);
@@ -1057,166 +360,100 @@ const App=()=>{
   useEffect(()=>{
     const mq=window.matchMedia("(prefers-color-scheme:dark)");
     const h=e=>setSysDark(e.matches);
-    if(mq.addEventListener) mq.addEventListener("change",h);
-    else mq.addListener(h);
-    return()=>{
-      if(mq.removeEventListener) mq.removeEventListener("change",h);
-      else mq.removeListener(h);
-    };
+    mq.addEventListener("change",h);
+    return()=>mq.removeEventListener("change",h);
   },[]);
 
   useEffect(()=>{
-    const dark=resolveTheme(themePref,sysDark)==="dark";
-    document.documentElement.setAttribute("data-theme",dark?"dark":"light");
+    document.documentElement.setAttribute("data-theme", resolveTheme(themePref,sysDark));
   },[themePref,sysDark]);
 
   useEffect(()=>{
-    const lock=settOpen||!onboarded;
-    document.body.style.overflow=lock?"hidden":"";
-    document.body.style.touchAction=lock?"none":"";
-    return()=>{document.body.style.overflow="";document.body.style.touchAction="";};
-  },[settOpen,onboarded]);
-
-  useEffect(()=>{
     if(!onboarded) return;
-    try{
-      if(!navigator.geolocation){setGeoState("denied");return;}
-      navigator.geolocation.getCurrentPosition(
-        pos=>{try{setCoords({lat:pos.coords.latitude,lon:pos.coords.longitude});setGeoState("got");}catch{}},
-        ()=>setGeoState("denied"),
-        {timeout:8000,maximumAge:60000}
-      );
-    }catch{setGeoState("denied");}
+    navigator.geolocation.getCurrentPosition(
+      pos=>{setCoords({lat:pos.coords.latitude,lon:pos.coords.longitude});setGeoState("got");},
+      ()=>setGeoState("denied"),{timeout:8000}
+    );
   },[onboarded]);
 
   useEffect(()=>{
     let cancelled=false;
     const load=async()=>{
-      setWeatherLoading(true);setWeatherError(null);
+      setLoading(true);
       const data=await fetchWeather(coords.lat,coords.lon);
-      if(cancelled) return;
-      if(data){
-        setLiveWeather(data.currentWeather);setLiveHourly(data.hourly);
-        setLiveDaily(data.daily);setLiveAqi(data.aqi);setLiveSunMoon(data.sun_moon);
-        if(!activeLocation) setActiveLocation({...data.locationFromApi,display:data.locationFromApi.village});
-      } else {
-        setWeatherError("Could not load weather data.");
-      }
-      setWeatherLoading(false);
+      if(cancelled||!data) return;
+      setWeatherData({cw:data.currentWeather,hourly:data.hourly,daily:data.daily,aqi:data.aqi,sun:data.sun_moon});
+      if(!activeLocation) setActiveLocation(data.locationFromApi);
+      setLoading(false);
     };
     load();
-    return()=>{cancelled=true;};
-  },[coords.lat,coords.lon]);
+    return()=> { cancelled=true; };
+  },[coords]);
 
   const isDark=resolveTheme(themePref,sysDark)==="dark";
-  const scene=liveWeather?.isStorm?"storm":"clear";
-  const cw=liveWeather||{temperature:"--",feelslike:"--",humidity:"--",windspeed:"--",uv_index:"--",visibility:"--",precipitation:"--",pressure:"--",dewPoint:"--",icon:"🌡️",condition:weatherLoading?"Loading…":"—",isStorm:false};
-  const aqi=liveAqi||{value:null,pollutant:"AQI"};
-  const sun_moon=liveSunMoon||{sunrise:"06:00",sunset:"18:00",daylight_hours:12,moon_emoji:"🌙"};
-  const displayLocation=activeLocation||{village:"Breeze",district:weatherLoading?"Loading…":"Wayanad",state:"Kerala"};
-
-  const handleSearch=useCallback(async q=>{
-    if(!q?.trim()) return;
-    setSearchError(null);
-    setActiveLocation({village:q,district:"Searching…",state:"",display:q});
-    setWeatherLoading(true);
-    try{
-      const geo=await geocodeWithOSM(q);
-      setCoords({lat:geo.lat,lon:geo.lon});
-      setActiveLocation({village:geo.village,district:geo.district,state:geo.state,display:geo.display});
-    }catch(e){
-      setSearchError(e.message);
-      setActiveLocation(null);
-      setWeatherLoading(false);
-    }
-  },[]);
+  const cw=weatherData.cw||{temperature:"--",icon:"🌡️",condition:"Loading…",feelslike:"--"};
 
   return(
-    <div style={{minHeight:"100vh",fontFamily:"'DM Sans',sans-serif"}}>
-      {weatherLoading&&!liveWeather&&(
-        <div style={{position:"fixed",inset:0,zIndex:50,background:"rgba(0,0,0,0.4)",display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"center",backdropFilter:"blur(8px)",gap:"14px"}}>
-          <div className="spin" style={{width:"28px",height:"28px",borderRadius:"50%",border:"3px solid rgba(72,198,239,.25)",borderTopColor:"#48C6EF"}}/>
-          <div style={{fontSize:"14px",fontWeight:300,color:"var(--text-sub)",letterSpacing:"0.03em"}}>Fetching weather…</div>
+    <div style={{minHeight:"100vh",padding:"16px",display:"flex",flexDirection:"column",gap:"12px",paddingTop:"calc(var(--sat) + 16px)"}}>
+      <SearchBar location={activeLocation} onSettings={()=>setSettOpen(true)} onSearch={async q=>{
+        try{
+          const geo=await geocodeWithOSM(q);
+          setCoords({lat:geo.lat,lon:geo.lon});
+          setActiveLocation(geo);
+        }catch(e){}
+      }} loading={loading && !!weatherData.cw}/>
+
+      <MapHero isDark={isDark} coords={coords} lowSig={lowSig} onExitLowSig={()=>setLowSig(false)}/>
+
+      <div style={{display:"flex",flexDirection:"column",gap:"12px"}}>
+        <HeroCard cw={cw} location={activeLocation} imp={imp}/>
+        <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:"10px"}}>
+          <G level={2} style={{padding:"14px"}}><StatLabel t="Wind"/>{cvtW(cw.windspeed,imp)}{wU(imp)}</G>
+          <G level={2} style={{padding:"14px"}}><StatLabel t="Humidity"/>{cw.humidity}%</G>
+          <G level={2} style={{padding:"14px"}}><StatLabel t="UV Index"/>{cw.uv_index}</G>
+          <G level={2} style={{padding:"14px"}}><StatLabel t="Visibility"/>{cvtV(cw.visibility,imp)}{vU(imp)}</G>
         </div>
-      )}
-
-      <div style={{minHeight:"100dvh",padding:"16px",paddingTop:`calc(var(--sat,0px) + 16px)`,paddingBottom:`calc(var(--sab,0px) + 16px)`,display:"flex",flexDirection:"column",gap:"12px"}}>
-        <SearchBar location={displayLocation} onSearch={handleSearch} onSettings={()=>setSettOpen(true)} loading={weatherLoading&&!!liveWeather}/>
-        
-        {searchError&&(
-          <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",padding:"10px 14px",borderRadius:"12px",background:"rgba(239,68,68,0.1)",border:"1px solid rgba(239,68,68,0.2)"}}>
-            <span style={{fontSize:"12px",color:"#fca5a5"}}>🔍 {searchError}</span>
-            <button onClick={()=>setSearchError(null)} style={{background:"none",border:"none",cursor:"pointer",color:"var(--text-dim)",fontSize:"16px",padding:"0 2px"}}>×</button>
-          </div>
-        )}
-        {weatherError&&(
-          <div style={{padding:"10px 14px",borderRadius:"12px",background:"rgba(239,68,68,0.08)",border:"1px solid rgba(239,68,68,0.15)",fontSize:"12px",color:"rgba(255,150,150,0.8)"}}>⚠️ {weatherError}</div>
-        )}
-
-        <MapHero isDark={isDark} coords={coords} activeLocation={displayLocation} lowSig={lowSig} onDisableLowSig={() => setLowSig(false)}/>
-
-        <div key={`${coords.lat},${coords.lon}`} className={weatherLoading&&liveWeather?"updating":""} style={{display:"flex",flexDirection:"column",gap:"12px"}}>
-          <HeroCard cw={cw} location={displayLocation} imp={imp}/>
-          <StatGrid cw={cw} imp={imp}/>
-          <ExtMetrics cw={cw}/>
-          <HourlyScroll hourly={liveHourly} imp={imp}/>
-          <div style={{display:"flex",gap:"12px"}}>
-            <AQICard aqi={aqi}/>
-            <SunCard sun_moon={sun_moon}/>
-          </div>
-          <DailyAccordion daily={liveDaily} imp={imp}/>
-        </div>
-
-        <div style={{textAlign:"center",fontSize:"10.5px",color:"var(--text-dim)",paddingTop:"4px"}}>
-          {geoState==="got"?`📍 ${coords?.lat?.toFixed(4)}°N ${coords?.lon?.toFixed(4)}°E · Live`:"Breeze · Open-Meteo · OSM"}
-        </div>
+        <HourlyScroll hourly={weatherData.hourly} imp={imp}/>
+        <DailyAccordion daily={weatherData.daily} imp={imp}/>
       </div>
 
       <SettingsPanel open={settOpen} onClose={()=>setSettOpen(false)}
         imp={imp} setImp={setImp} lowSig={lowSig} setLowSig={setLowSig}
         themePref={themePref} setThemePref={setThemePref}
-        notifPerm={notifPerm} geoState={geoState}
-        onRequestNotif={async()=>{if(!("Notification" in window))return;const p=await Notification.requestPermission();setNotifPerm(p);}}/>
+        geoState={geoState} notifPerm={notifPerm}
+        onRequestNotif={async()=>{const p=await Notification.requestPermission();setNotifPerm(p);}}/>
 
-      {!onboarded&&(
-        <WelcomeOverlay onComplete={()=>{
-          setOnboarded(true);
-          if(navigator.geolocation) navigator.geolocation.getCurrentPosition(
-            pos=>{setCoords({lat:pos.coords.latitude,lon:pos.coords.longitude});setGeoState("got");},
-            ()=>setGeoState("denied"),{timeout:8000,maximumAge:60000}
-          );
-          if("Notification" in window) setNotifPerm(Notification.permission);
-        }}/>
-      )}
+      {!onboarded && <WelcomeOverlay onComplete={()=>{ localStorage.setItem("bz_onboarded","true"); setOnboarded(true); }}/>}
     </div>
   );
 };
 
+const StatLabel=({t})=><div style={{fontSize:"11px",color:"var(--text-sub)",textTransform:"uppercase",marginBottom:"4px"}}>{t}</div>;
+
+const WelcomeOverlay=({onComplete})=>(
+  <div style={{position:"fixed",inset:0,background:"rgba(0,0,0,0.8)",zIndex:500,display:"flex",alignItems:"center",justifyContent:"center",backdropFilter:"blur(20px)",padding:"24px"}}>
+    <div className="material m-thick" style={{padding:"32px",textAlign:"center",maxWidth:"340px"}}>
+      <div style={{fontSize:"48px",marginBottom:"16px"}}>🌤️</div>
+      <div style={{fontSize:"24px",fontWeight:800,marginBottom:"12px"}}>Breeze</div>
+      <div style={{fontSize:"14px",color:"var(--text-sub)",lineHeight:1.6,marginBottom:"24px"}}>Get hyper-local forecasts and severe weather alerts.</div>
+      <button onClick={onComplete} style={{width:"100%",padding:"14px",borderRadius:"14px",background:"#48C6EF",border:"none",color:"#fff",fontWeight:700,fontSize:"16px"}}>Let's Go</button>
+    </div>
+  </div>
+);
+
+/* ═══════════════════════════════════════════════════════
+   SYSTEM INIT
+═══════════════════════════════════════════════════════ */
 class ErrorBoundary extends React.Component {
-  constructor(props){super(props);this.state={hasError:false,error:null};}
-  static getDerivedStateFromError(e){return{hasError:true,error:e};}
+  state={error:null}; static getDerivedStateFromError(e){return{error:e};}
   render(){
-    if(this.state.hasError) return(
-      <div style={{minHeight:"100vh",display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"center",background:"#0a0f1e",color:"var(--text-main)",padding:"24px",textAlign:"center",fontFamily:"'DM Sans',sans-serif"}}>
-        <div style={{fontSize:"36px",marginBottom:"14px"}}>⚠️</div>
-        <div style={{fontSize:"17px",fontWeight:700,marginBottom:"8px"}}>Breeze encountered an error</div>
-        <div style={{fontSize:"13px",opacity:.4,marginBottom:"22px"}}>{this.state.error?.message||"Unknown error"}</div>
-        <button onClick={()=>window.location.reload()} style={{padding:"10px 22px",borderRadius:"12px",border:"none",cursor:"pointer",background:"#48C6EF",color:"var(--text-main)",fontWeight:600,fontSize:"14px"}}>Reload App</button>
-      </div>
-    );
+    if(this.state.error) return <div style={{padding:"40px",textAlign:"center"}}>⚠️ Breeze crashed. <button onClick={()=>location.reload()}>Reload</button></div>;
     return this.props.children;
   }
 }
-
-const _mount=()=>{
-  const el=document.getElementById("root");
-  if(!el){return;}
-  ReactDOM.createRoot(el).render(<ErrorBoundary><App/></ErrorBoundary>);
-};
-if(document.readyState==="loading") document.addEventListener("DOMContentLoaded",_mount);
-else _mount();
+const el=document.getElementById("root");
+ReactDOM.createRoot(el).render(<ErrorBoundary><App/></ErrorBoundary>);
 </script>
 </body>
 </html>
-
 
