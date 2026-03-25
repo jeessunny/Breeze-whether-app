@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <script defer src="/_vercel/analytics/script.js"></script>
+  <script src="/_vercel/analytics/script.js"></script>
   <meta charset="UTF-8"/>
   <meta name="viewport" content="width=device-width,initial-scale=1.0,viewport-fit=cover"/>
   <meta name="mobile-web-app-capable" content="yes"/>
@@ -26,24 +26,19 @@
 
     /* ── iOS material tokens — dark (default) ────────────────── */
     :root{
-      /* Material levels */
       --ultra-thin: rgba(255,255,255,0.04);
       --thin:       rgba(255,255,255,0.08);
       --regular:    rgba(255,255,255,0.14);
       --thick:      rgba(255,255,255,0.22);
-      /* Borders */
       --border-light: rgba(255,255,255,0.22);
       --border-dark:  rgba(0,0,0,0.08);
-      /* Aliases for legacy usage */
       --glass-1: rgba(255,255,255,0.04);
       --glass-2: rgba(255,255,255,0.08);
       --glass-3: rgba(255,255,255,0.14);
       --glass-border: rgba(255,255,255,0.22);
-      /* Text */
       --text-main: #ffffff;
       --text-sub:  rgba(255,255,255,0.7);
       --text-dim:  rgba(255,255,255,0.45);
-      /* Util */
       --accent: #48C6EF;
       --divider: rgba(255,255,255,0.1);
       --sat: env(safe-area-inset-top,0px);
@@ -51,7 +46,6 @@
       --sal: env(safe-area-inset-left,0px);
     }
 
-    /* ── Light mode overrides ──────────────────────────────── */
     [data-theme="light"]{
       --ultra-thin: rgba(255,255,255,0.12);
       --thin:       rgba(255,255,255,0.18);
@@ -69,7 +63,6 @@
       --divider: rgba(0,0,0,0.08);
     }
 
-    /* ── Adaptive body background ──────────────────────────── */
     body{
       background:
         radial-gradient(circle at 20% 20%, #1a2a4a 0%, transparent 42%),
@@ -92,7 +85,6 @@
     }
     #root{min-height:100%;}
 
-    /* ── iOS material system ───────────────────────────────── */
     .material,.glass{
       backdrop-filter: blur(30px) saturate(1.8);
       -webkit-backdrop-filter: blur(30px) saturate(1.8);
@@ -104,7 +96,6 @@
       transition: transform .12s ease;
     }
     .material:active,.glass:active{transform:scale(0.985);}
-    /* iOS top-edge specular highlight */
     .material::before,.glass::before{
       content:"";
       position:absolute;
@@ -116,7 +107,6 @@
       z-index:0;
     }
     .material>*,.glass>*{position:relative;z-index:1;}
-    /* Depth levels */
     .m-ultra,.glass-1{ background:var(--ultra-thin); }
     .m-thin,.glass-2{  background:var(--thin); }
     .m-regular,.glass-3{ background:var(--regular); }
@@ -124,7 +114,6 @@
     @media(max-width:768px){
       .material,.glass{backdrop-filter:blur(22px) saturate(1.6);-webkit-backdrop-filter:blur(22px) saturate(1.6);}
     }
-    /* Light mode: stronger blur, thinner glass = real liquid glass */
     [data-theme="light"] .material,
     [data-theme="light"] .glass{
       backdrop-filter: blur(36px) saturate(1.8);
@@ -132,57 +121,45 @@
       border: 1px solid var(--border-dark);
       box-shadow: inset 0 1px 0 rgba(255,255,255,0.6), 0 2px 10px rgba(0,0,0,0.07);
     }
-    /* Settings / Legal panels: opaque layered sheet (Apple style) */
     .panel-in{background:rgba(20,25,40,0.88);}
     [data-theme="light"] .panel-in{
       background: rgba(245,247,252,0.94) !important;
     }
 
-    /* ── Map canvas ────────────────────────────────────────── */
     .map-wrap{position:relative;border-radius:20px;overflow:hidden;height:220px;flex-shrink:0;}
     .map-canvas{position:absolute;inset:0;width:100%;height:100%;opacity:0;transition:opacity 1s ease;}
     .map-canvas.loaded{opacity:1;}
 
-    /* ── Scrollbar hide ────────────────────────────────────── */
     .no-scroll::-webkit-scrollbar{display:none}
     .no-scroll{-ms-overflow-style:none;scrollbar-width:none}
 
-    /* ── Spinner ───────────────────────────────────────────── */
     @keyframes spin{to{transform:rotate(360deg)}}
     .spin{animation:spin .8s linear infinite;}
 
-    /* ── Toggle ────────────────────────────────────────────── */
     button{line-height:0;}
     .tog{width:42px;height:24px;border-radius:12px;position:relative;cursor:pointer;flex-shrink:0;transition:background .2s;}
     .tog-k{position:absolute;top:3px;width:18px;height:18px;border-radius:50%;background:#fff;box-shadow:0 1px 4px rgba(0,0,0,.4);transition:transform .22s cubic-bezier(.34,1.56,.64,1);}
 
-    /* ── Accordion ─────────────────────────────────────────── */
     .acc-body{display:grid;grid-template-rows:0fr;transition:grid-template-rows .35s ease,opacity .25s ease;opacity:0;}
     .acc-body.open{grid-template-rows:1fr;opacity:1;}
     .acc-inner{min-height:0;overflow:hidden;}
 
-    /* ── Search input ──────────────────────────────────────── */
     .srch::placeholder{color:var(--text-dim);}
     .srch::-webkit-search-cancel-button,.srch::-webkit-search-decoration{-webkit-appearance:none;}
 
-    /* ── Updating blur ─────────────────────────────────────── */
     .updating{filter:blur(4px);opacity:0.5;pointer-events:none;transition:filter .25s,opacity .25s;}
 
-    /* ── Onboarding ────────────────────────────────────────── */
     @keyframes fadeUp{from{opacity:0;transform:translateY(24px)}to{opacity:1;transform:none}}
     @keyframes fadeOut{from{opacity:1}to{opacity:0}}
     .ob-in{animation:fadeUp .5s ease both;}
     .ob-out{animation:fadeOut .35s ease forwards;}
 
-    /* ── Slide-in panel ────────────────────────────────────── */
     @keyframes slideIn{from{transform:translateX(100%)}to{transform:none}}
     .panel-in{animation:slideIn .32s cubic-bezier(.32,.72,0,1) both;}
 
-    /* ── Segmented control ─────────────────────────────────── */
     .seg{display:flex;background:var(--thin);border-radius:12px;padding:4px;gap:3px;}
     .seg-btn{flex:1;padding:10px 8px;border-radius:10px;border:none;cursor:pointer;font-family:'DM Sans',sans-serif;font-size:13px;font-weight:500;transition:background .15s,color .15s;}
 
-    /* ── Section label ─────────────────────────────────────── */
     .section-label{
       display:flex;align-items:center;gap:10px;
       padding:0;margin-bottom:10px;
@@ -302,7 +279,6 @@ const _fetchWithTimeout = async (url, opts={}, ms=7000) => {
 const geocodeWithOSM = async (query) => {
   if(!query?.trim()) throw new Error("Empty search query");
   const q = query.trim();
-  // Attempt 1: Open-Meteo
   try {
     const r = await _fetchWithTimeout(`https://geocoding-api.open-meteo.com/v1/search?name=${encodeURIComponent(q)}&count=1&language=en&format=json`,{},6000);
     if(r.status===429) throw new Error("rate_limit");
@@ -312,7 +288,6 @@ const geocodeWithOSM = async (query) => {
       if(v) return {lat:Number(v.latitude),lon:Number(v.longitude),village:(v.name||q).trim(),district:v.admin1||"",state:v.country||"",display:(v.name||q).trim()};
     }
   } catch(e){ if(e.message==="rate_limit") throw new Error("Rate limit reached. Please wait a moment."); }
-  // Attempt 2: Nominatim
   try {
     const r2 = await _fetchWithTimeout(`https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(q)}&format=json&limit=1&addressdetails=1`,{headers:{"Accept-Language":"en","User-Agent":"BreezeWeatherApp/12"}},7000);
     if(r2.status===429) throw new Error("Rate limit (Nominatim). Please wait.");
@@ -362,7 +337,7 @@ const fetchWeather = async (lat, lon) => {
     try {
       [wRes,aqRes] = await Promise.all([
         fetch(wUrl,{signal:wCtrl.signal}),
-        fetch(aqUrl,{signal:aqCtrl.signal}).catch(e=>{console.warn('[Breeze] AQI fetch:',e.message);return null;}),
+        fetch(aqUrl,{signal:aqCtrl.signal}).catch(e=>{return null;}),
       ]);
     } finally { clearTimeout(wT); clearTimeout(aqT); }
     if(!wRes.ok) throw new Error(`Weather API ${wRes.status}`);
@@ -378,14 +353,11 @@ const fetchWeather = async (lat, lon) => {
       humidity:nr(c.relative_humidity_2m), precipitation:nf(c.precipitation),
       windspeed:nr(c.wind_speed_10m), pressure:nr(c.surface_pressure),
       dewPoint:nr(c.dew_point_2m), uv_index:nr(c.uv_index),
-      visibility:c.visibility!=null?nr(c.visibility/1000):"--", // API returns meters; /1000 → km
+      visibility:c.visibility!=null?nr(c.visibility/1000):"--", 
       icon:wd.icon, condition:wd.condition, isStorm:wd.isStorm, conditionCode:wd.isStorm?"storm":"clear",
     };
 
     const hTimes=wData.hourly?.time||[];
-    
-    // BUG FIX: Use the target location's current local time from Open-Meteo payload 
-    // to sync the hourly forecast scroll accurately across timezones.
     const targetLocalTime = c.time || new Date().toISOString().slice(0,16);
     const targetHour = targetLocalTime.slice(0,13); 
     let si=hTimes.findIndex(t=>t.slice(0,13)>=targetHour); if(si<0)si=0;
@@ -397,7 +369,6 @@ const fetchWeather = async (lat, lon) => {
 
     const dTimes=wData.daily?.time||[];
     const daily=dTimes.map((t,i)=>{
-      // BUG FIX: Extract YYYY, MM, DD manually to avoid timezone shift pushing the date across midnight
       const [yy,mm,dd] = t.split("-").map(Number);
       const d = new Date(yy, mm-1, dd); 
       const dwd=getWeatherDetails(wData.daily.weather_code?.[i]);
@@ -434,7 +405,7 @@ const fetchWeather = async (lat, lon) => {
     const tzParts=(wData.timezone||"Asia/Kolkata").split("/");
     const locationFromApi={village:(tzParts[1]||"Location").replace(/_/g," "),district:tzParts[0]||"",state:""};
     return {currentWeather,hourly,daily,aqi,sun_moon,locationFromApi};
-  } catch(e){ console.error("[Breeze] fetchWeather:",e.message); return null; }
+  } catch(e){ return null; }
 };
 
 /* ═══════════════════════════════════════════════════════
@@ -521,19 +492,15 @@ const MapHero=({isDark,coords,activeLocation,lowSig})=>{
     const tryInit= async ()=>{
       try{
         if(unmounted||!mapRef.current) return;
-        
-        // Wait for the dynamic script to load securely from your Vercel backend
         if(!window.google || !window.google.maps) {
           await loadGoogleMaps().catch(()=>{});
         }
-
         if(!window.google||!window.google.maps||typeof window.google.maps.Map!=="function"){
           if(++attempts<100) retryTimer=setTimeout(tryInit,100);
           return;
         }
         if(instRef.current) return;
         const lat=coords?.lat!=null?Number(coords.lat):11.5728, lng=coords?.lon!=null?Number(coords.lon):76.0808;
-        
         const map=new window.google.maps.Map(mapRef.current,{
           center:{lat,lng},zoom:13.5,
           tilt:window.innerWidth>768?67:0,heading:45,
@@ -552,7 +519,7 @@ const MapHero=({isDark,coords,activeLocation,lowSig})=>{
         });
         tilesListener=map.addListener("tilesloaded",()=>{if(!unmounted&&mapRef.current) mapRef.current.classList.add("loaded");});
         fallbackTimer=setTimeout(()=>{if(!unmounted&&mapRef.current) mapRef.current.classList.add("loaded");},3000);
-      }catch(e){console.error("[Breeze] Maps:",e);}
+      }catch(e){}
     };
     tryInit();
     return()=>{
@@ -560,7 +527,6 @@ const MapHero=({isDark,coords,activeLocation,lowSig})=>{
       if(retryTimer) clearTimeout(retryTimer);
       if(fallbackTimer) clearTimeout(fallbackTimer);
       if(tilesListener){if(tilesListener.remove)tilesListener.remove();else if(window.google?.maps?.event)window.google.maps.event.removeListener(tilesListener);}
-      // BUG FIX: Clean up marker on unmount to avoid memory leaks
       if(markerRef.current) markerRef.current.setMap(null); 
     };
   },[]);
@@ -675,7 +641,7 @@ const StatGrid=({cw,imp})=>{
 };
 
 /* ═══════════════════════════════════════════════════════
-   EXTENDED METRICS — pressure + dew point
+   EXTENDED METRICS
 ═══════════════════════════════════════════════════════ */
 const ExtMetrics=({cw})=>{
   const rows=[
@@ -789,7 +755,7 @@ const DailyAccordion=({daily,imp})=>{
             <div key={i} style={{borderBottom:i<daily.length-1?"1px solid var(--border-light)":"none"}}>
               <button onClick={()=>setOpen(p=>p===i?null:i)}
                 style={{display:"flex",alignItems:"center",width:"100%",padding:"13px 16px",background:"none",border:"none",cursor:"pointer",gap:"0",textAlign:"left"}}>
-                <span style={{fontFamily:"'DM Sans',sans-serif",fontSize:"13px",fontWeight:i===0?600:400,color:i===0?"#48C6EF":"var(--text-main)",fontWeight:i===0?700:500,width:"86px",flexShrink:0}}>{day.name}</span>
+                <span style={{fontFamily:"'DM Sans',sans-serif",fontSize:"13px",fontWeight:i===0?700:500,color:i===0?"#48C6EF":"var(--text-main)",width:"86px",flexShrink:0}}>{day.name}</span>
                 <span style={{fontSize:"18px",flexShrink:0}}>{day.icon}</span>
                 <span style={{fontSize:"11.5px",color:"var(--text-sub)",flex:1,textAlign:"center",padding:"0 8px",overflow:"hidden",whiteSpace:"nowrap",textOverflow:"ellipsis"}}>{day.condition}</span>
                 <div style={{display:"flex",gap:"8px",alignItems:"center",flexShrink:0,marginRight:"8px"}}>
@@ -803,7 +769,6 @@ const DailyAccordion=({daily,imp})=>{
 
               <div className={`acc-body${isOpen?" open":""}`}>
                 <div className="acc-inner" style={{background:"transparent"}}>
-                  {/* Mini hourly */}
                   {day.hours?.length>0&&(
                     <div className="no-scroll" style={{display:"flex",gap:"7px",overflowX:"auto",padding:"10px 16px 6px"}}>
                       {day.hours.map((h,j)=>(
@@ -816,7 +781,6 @@ const DailyAccordion=({daily,imp})=>{
                       ))}
                     </div>
                   )}
-                  {/* 2x2 metrics */}
                   <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:"7px",padding:"6px 16px 14px"}}>
                     {[
                       {label:"UV Index",value:day.uvIndex,note:day.uvIndex!=="--"?(day.uvIndex>=8?"Very High":day.uvIndex>=6?"High":"Moderate"):""},
@@ -833,7 +797,6 @@ const DailyAccordion=({daily,imp})=>{
                       </div>
                     ))}
                   </div>
-                  {/* Summary */}
                   <div style={{margin:"0 16px 12px",padding:"10px 12px",borderRadius:"10px",background:"rgba(72,198,239,0.08)",border:"1px solid rgba(72,198,239,0.18)"}}>
                     <div style={{fontSize:"12px",color:"var(--text-sub)",lineHeight:"1.6"}}>{day.summary}</div>
                   </div>
@@ -848,30 +811,30 @@ const DailyAccordion=({daily,imp})=>{
 };
 
 /* ═══════════════════════════════════════════════════════
-   PANEL HEADER — shared by Settings + Legal (identical layout)
+   PANEL HEADER
 ═══════════════════════════════════════════════════════ */
 const PanelHeader=({title,subtitle,onBack,backIcon})=>(
   <div style={{
-    padding:"calc(var(--sat,0px)+24px) calc(var(--sal,0px) + 32px) 0",
-    display:"flex",alignItems:"flex-start",justifyContent:"space-between",
+    padding:"calc(var(--sat,0px) + 32px) calc(var(--sal,0px) + 36px) 0",
+    display:"flex",alignItems:"center",justifyContent:"space-between",
     gap:"24px",
-    marginBottom:"16px",
+    marginBottom:"24px",
   }}>
     <div style={{display:"flex",flexDirection:"column",justifyContent:"center"}}>
-      <div style={{fontFamily:"'Urbanist',sans-serif",fontSize:"20px",fontWeight:800,
+      <div style={{fontFamily:"'Urbanist',sans-serif",fontSize:"24px",fontWeight:800,
         lineHeight:"1.1",letterSpacing:"-0.02em",color:"var(--text-main)"}}>
         {title}
       </div>
       {subtitle&&(
-        <div style={{fontSize:"11.5px",color:"var(--text-sub)",marginTop:"4px"}}>{subtitle}</div>
+        <div style={{fontSize:"13px",color:"var(--text-sub)",marginTop:"4px"}}>{subtitle}</div>
       )}
     </div>
     <button onClick={onBack} style={{
-      width:"32px",height:"32px",borderRadius:"50%",background:"transparent",
+      width:"34px",height:"34px",borderRadius:"50%",background:"var(--thin)",
       border:"1px solid var(--border-light)",display:"flex",alignItems:"center",
       justifyContent:"center",cursor:"pointer",flexShrink:0,lineHeight:0,
     }}>
-      {backIcon||<I.X s={14} c="var(--text-sub)"/>}
+      {backIcon||<I.X s={16} c="var(--text-main)"/>}
     </button>
   </div>
 );
@@ -881,7 +844,7 @@ const PanelHeader=({title,subtitle,onBack,backIcon})=>(
 ═══════════════════════════════════════════════════════ */
 const THEME_OPTS=[{id:"light",icon:"☀️",label:"Light"},{id:"system",icon:"⚙️",label:"System"},{id:"dark",icon:"🌙",label:"Dark"}];
 
-const SettingsPanel=({open,onClose,imp,setImp,lowSig,setLowSig,themePref,setThemePref,notifPerm,onRequestNotif})=>{
+const SettingsPanel=({open,onClose,imp,setImp,lowSig,setLowSig,themePref,setThemePref,notifPerm,onRequestNotif,geoState})=>{
   const [showLegal,setShowLegal]=useState(false);
   if(!open) return null;
 
@@ -907,7 +870,12 @@ const SettingsPanel=({open,onClose,imp,setImp,lowSig,setLowSig,themePref,setThem
       <div className="panel-in" style={{position:"fixed",top:0,right:0,bottom:0,width:"min(360px,94vw)",background:"rgba(20,25,40,0.88)",borderLeft:"1px solid var(--border-light)",zIndex:200,overflowY:"auto",paddingBottom:"max(24px,var(--sab,24px))"}}>
         {!showLegal&&<>
         <PanelHeader title="Settings" subtitle="Breeze v0.12.0" onBack={onClose}/>
-        <div style={{padding:"0 calc(var(--sal,0px) + 32px)"}}>
+        <div style={{padding:"0 calc(var(--sal,0px) + 36px)"}}>
+          <Cat c="System Status"/>
+          <Row Icon={I.Pin} title="Location Permission" 
+            sub={geoState==="got" ? "Location active" : "Location denied — using default"}
+            right={<div style={{width:"8px",height:"8px",borderRadius:"50%",background:geoState==="got"?"#22c55e":"#ef4444"}}/>} />
+            
           <Cat c="Appearance"/>
           <div style={{padding:"12px 0",borderBottom:"1px solid var(--divider)"}}>
             <div style={{fontSize:"13px",fontWeight:500,color:"var(--text-main)",marginBottom:"8px"}}>Theme</div>
@@ -933,11 +901,6 @@ const SettingsPanel=({open,onClose,imp,setImp,lowSig,setLowSig,themePref,setThem
             <Row Icon={I.Leaf} title="Data Sources & Legal" sub="Open-Meteo · OSM · Google Maps"
               right={<I.Chev s={13} c="#48C6EF"/>} last/>
           </div>
-          <div style={{marginTop:"20px",padding:"12px",borderRadius:"12px",background:"rgba(72,198,239,0.07)",border:"1px solid rgba(72,198,239,0.15)"}}>
-            <div style={{fontSize:"11.5px",color:"var(--text-sub)",lineHeight:"1.6"}}>
-              ✅ <strong style={{color:"var(--text-main)"}}>Phase 12 — Production.</strong> Live weather via Open-Meteo, dual geocoding, Google Maps 3D.
-            </div>
-          </div>
         </div>
         </>}
       </div>
@@ -945,7 +908,7 @@ const SettingsPanel=({open,onClose,imp,setImp,lowSig,setLowSig,themePref,setThem
       {showLegal&&(
         <div className="panel-in" style={{position:"fixed",top:0,right:0,bottom:0,width:"min(360px,94vw)",background:"rgba(20,25,40,0.88)",borderLeft:"1px solid var(--border-light)",zIndex:300,overflowY:"auto",paddingBottom:"max(24px,var(--sab,24px))"}}>
           <PanelHeader title="Legal & Data Sources" onBack={()=>setShowLegal(false)}/>
-          <div style={{padding:"0 calc(var(--sal,0px) + 32px)"}}>
+          <div style={{padding:"0 calc(var(--sal,0px) + 36px)"}}>
             {[
               {title:"Weather Forecasts",src:"Open-Meteo",url:"https://open-meteo.com",license:"CC BY 4.0",desc:"Free weather API — no API key required."},
               {title:"Geocoding",src:"OpenStreetMap Nominatim",url:"https://nominatim.openstreetmap.org",license:"ODbL",desc:"© OpenStreetMap contributors."},
@@ -972,77 +935,6 @@ const SettingsPanel=({open,onClose,imp,setImp,lowSig,setLowSig,themePref,setThem
 };
 
 /* ═══════════════════════════════════════════════════════
-   NOTIFICATION HOOK
-═══════════════════════════════════════════════════════ */
-const useWeatherAlerts=(alerts,scene)=>{
-  const notifiedRef=useRef(new Set());
-  useEffect(()=>{
-    if(!alerts?.length||!("Notification" in window)||Notification.permission!=="granted") return;
-    const timer=setTimeout(()=>{
-      alerts.forEach(a=>{
-        const key=`${scene}:${a.id}`;
-        if(notifiedRef.current.has(key)) return;
-        notifiedRef.current.add(key);
-        new Notification(a.title,{body:a.desc,icon:"/icon-192.png",tag:`breeze-${a.id}`});
-      });
-    },1500);
-    return()=>clearTimeout(timer);
-  },[scene]);
-};
-
-/* ═══════════════════════════════════════════════════════
-   WELCOME OVERLAY
-═══════════════════════════════════════════════════════ */
-const WelcomeOverlay=({onComplete})=>{
-  const [exiting,setExiting]=useState(false);
-  const [step,setStep]=useState("idle");
-
-  const go=async()=>{
-    setStep("requesting");
-    await new Promise(resolve=>{
-      if(!navigator.geolocation){resolve();return;}
-      navigator.geolocation.getCurrentPosition(resolve,resolve,{timeout:8000});
-    });
-    if("Notification" in window&&Notification.permission==="default"){
-      try{await Notification.requestPermission();}catch{}
-    }
-    try{localStorage.setItem("breeze_onboarded","true");}catch{}
-    setExiting(true);
-    setTimeout(()=>onComplete(),400);
-  };
-
-  return(
-    <div className={exiting?"ob-out":""} style={{position:"fixed",inset:0,zIndex:400,display:"flex",alignItems:"center",justifyContent:"center",background:"rgba(5,8,20,0.85)",backdropFilter:"blur(24px)",WebkitBackdropFilter:"blur(24px)",padding:"24px"}}>
-      <div className="ob-in glass" style={{width:"100%",maxWidth:"340px",padding:"36px 28px 28px",textAlign:"center",borderColor:"rgba(72,198,239,0.2)"}}>
-        <div style={{fontSize:"44px",marginBottom:"20px"}}>🌤️</div>
-        <div style={{fontFamily:"'Urbanist',sans-serif",fontSize:"24px",fontWeight:800,color:"var(--text-main)",letterSpacing:"-0.02em",marginBottom:"10px"}}>Welcome to Breeze</div>
-        <div style={{fontSize:"14px",color:"var(--text-sub)",lineHeight:"1.65",marginBottom:"28px"}}>
-          For hyper-local weather and alerts, Breeze needs your{" "}
-          <span style={{color:"var(--text-main)"}}>location and notification</span> permissions.
-        </div>
-        <div style={{display:"flex",gap:"8px",justifyContent:"center",marginBottom:"24px",flexWrap:"wrap"}}>
-          {[["📍","Location"],["🔔","Alerts"]].map(([icon,label])=>(
-            <div key={label} style={{display:"flex",alignItems:"center",gap:"5px",padding:"5px 11px",borderRadius:"20px",background:"rgba(72,198,239,0.08)",border:"1px solid rgba(72,198,239,0.18)"}}>
-              <span style={{fontSize:"12px"}}>{icon}</span>
-              <span style={{fontSize:"11.5px",color:"var(--text-main)",fontWeight:500}}>{label}</span>
-            </div>
-          ))}
-        </div>
-        <button onClick={go} disabled={step==="requesting"}
-          style={{width:"100%",padding:"14px",borderRadius:"14px",border:"none",cursor:step==="requesting"?"default":"pointer",fontFamily:"'Urbanist',sans-serif",fontSize:"15px",fontWeight:700,background:step==="requesting"?"rgba(72,198,239,0.2)":"#48C6EF",color:step==="requesting"?"rgba(72,198,239,0.7)":"white",display:"flex",alignItems:"center",justifyContent:"center",gap:"8px"}}>
-          {step==="requesting"&&<div className="spin" style={{width:"15px",height:"15px",borderRadius:"50%",border:"2px solid rgba(72,198,239,.3)",borderTopColor:"#48C6EF"}}/>}
-          {step==="requesting"?"Requesting…":"Grant Permissions"}
-        </button>
-        <button onClick={()=>{try{localStorage.setItem("breeze_onboarded","true");}catch{}onComplete();}}
-          style={{background:"none",border:"none",cursor:"pointer",fontSize:"12px",color:"var(--text-dim)",marginTop:"14px",padding:"4px"}}>
-          Skip for now
-        </button>
-      </div>
-    </div>
-  );
-};
-
-/* ═══════════════════════════════════════════════════════
    ROOT APP
 ═══════════════════════════════════════════════════════ */
 const App=()=>{
@@ -1055,7 +947,6 @@ const App=()=>{
     }catch{return false;}
   });
   
-  // BUG FIX: Settings are now permanently saved to localStorage so preferences aren't lost on refresh.
   const [imp,setImp]=useState(()=>localStorage.getItem("bz_imp")==="true");
   const [themePref,setThemePref]=useState(()=>localStorage.getItem("bz_theme")||"system");
   const [lowSig,setLowSig]=useState(()=>{
@@ -1081,7 +972,6 @@ const App=()=>{
   const [weatherError,setWeatherError]=useState(null);
   const [searchError,setSearchError]=useState(null);
 
-  // Sync settings to localStorage
   useEffect(()=>{ localStorage.setItem("bz_imp",imp); },[imp]);
   useEffect(()=>{ localStorage.setItem("bz_theme",themePref); },[themePref]);
   useEffect(()=>{ localStorage.setItem("bz_lowsig",lowSig); },[lowSig]);
@@ -1097,7 +987,6 @@ const App=()=>{
     };
   },[]);
 
-  // ── Apply data-theme to <html> so CSS vars work globally ──
   useEffect(()=>{
     const dark=resolveTheme(themePref,sysDark)==="dark";
     document.documentElement.setAttribute("data-theme",dark?"dark":"light");
@@ -1164,12 +1053,8 @@ const App=()=>{
     }
   },[]);
 
-  useWeatherAlerts([],scene);
-
   return(
     <div style={{minHeight:"100vh",fontFamily:"'DM Sans',sans-serif"}}>
-
-      {/* First-load spinner */}
       {weatherLoading&&!liveWeather&&(
         <div style={{position:"fixed",inset:0,zIndex:50,background:"rgba(0,0,0,0.4)",display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"center",backdropFilter:"blur(8px)",gap:"14px"}}>
           <div className="spin" style={{width:"28px",height:"28px",borderRadius:"50%",border:"3px solid rgba(72,198,239,.25)",borderTopColor:"#48C6EF"}}/>
@@ -1177,18 +1062,9 @@ const App=()=>{
         </div>
       )}
 
-      {/* Main scroll */}
       <div style={{minHeight:"100dvh",padding:"16px",paddingTop:`calc(var(--sat,0px) + 16px)`,paddingBottom:`calc(var(--sab,0px) + 16px)`,display:"flex",flexDirection:"column",gap:"12px"}}>
-
-        {/* Search bar */}
         <SearchBar location={displayLocation} onSearch={handleSearch} onSettings={()=>setSettOpen(true)} loading={weatherLoading&&!!liveWeather}/>
-
-        {/* Banners */}
-        {geoState==="denied"&&onboarded&&(
-          <div style={{padding:"10px 14px",borderRadius:"12px",background:"rgba(239,68,68,0.1)",border:"1px solid rgba(239,68,68,0.2)",fontSize:"12px",color:"rgba(255,255,255,0.65)"}}>
-            📍 Location denied — showing default. <span style={{color:"#f87171"}}>Enable in browser settings.</span>
-          </div>
-        )}
+        
         {searchError&&(
           <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",padding:"10px 14px",borderRadius:"12px",background:"rgba(239,68,68,0.1)",border:"1px solid rgba(239,68,68,0.2)"}}>
             <span style={{fontSize:"12px",color:"#fca5a5"}}>🔍 {searchError}</span>
@@ -1205,10 +1081,8 @@ const App=()=>{
           </div>
         )}
 
-        {/* Map */}
         <MapHero isDark={isDark} coords={coords} activeLocation={displayLocation} lowSig={lowSig}/>
 
-        {/* Weather cards — keyed so animations re-trigger on city change */}
         <div key={`${coords.lat},${coords.lon}`} className={weatherLoading&&liveWeather?"updating":""} style={{display:"flex",flexDirection:"column",gap:"12px"}}>
           <HeroCard cw={cw} location={displayLocation} imp={imp}/>
           <StatGrid cw={cw} imp={imp}/>
@@ -1221,7 +1095,6 @@ const App=()=>{
           <DailyAccordion daily={liveDaily} imp={imp}/>
         </div>
 
-        {/* Footer */}
         <div style={{textAlign:"center",fontSize:"10.5px",color:"var(--text-dim)",paddingTop:"4px"}}>
           {geoState==="got"?`📍 ${coords?.lat?.toFixed(4)}°N ${coords?.lon?.toFixed(4)}°E · Live`:"Breeze · Open-Meteo · OSM"}
         </div>
@@ -1230,7 +1103,7 @@ const App=()=>{
       <SettingsPanel open={settOpen} onClose={()=>setSettOpen(false)}
         imp={imp} setImp={setImp} lowSig={lowSig} setLowSig={setLowSig}
         themePref={themePref} setThemePref={setThemePref}
-        notifPerm={notifPerm}
+        notifPerm={notifPerm} geoState={geoState}
         onRequestNotif={async()=>{if(!("Notification" in window))return;const p=await Notification.requestPermission();setNotifPerm(p);}}/>
 
       {!onboarded&&(
@@ -1247,13 +1120,9 @@ const App=()=>{
   );
 };
 
-/* ═══════════════════════════════════════════════════════
-   ERROR BOUNDARY + MOUNT
-═══════════════════════════════════════════════════════ */
 class ErrorBoundary extends React.Component {
   constructor(props){super(props);this.state={hasError:false,error:null};}
   static getDerivedStateFromError(e){return{hasError:true,error:e};}
-  componentDidCatch(e,i){console.error("[Breeze]",e,i);}
   render(){
     if(this.state.hasError) return(
       <div style={{minHeight:"100vh",display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"center",background:"#0a0f1e",color:"var(--text-main)",padding:"24px",textAlign:"center",fontFamily:"'DM Sans',sans-serif"}}>
@@ -1269,7 +1138,7 @@ class ErrorBoundary extends React.Component {
 
 const _mount=()=>{
   const el=document.getElementById("root");
-  if(!el){console.error("[Breeze] #root not found");return;}
+  if(!el){return;}
   ReactDOM.createRoot(el).render(<ErrorBoundary><App/></ErrorBoundary>);
 };
 if(document.readyState==="loading") document.addEventListener("DOMContentLoaded",_mount);
@@ -1277,4 +1146,5 @@ else _mount();
 </script>
 </body>
 </html>
+
 
