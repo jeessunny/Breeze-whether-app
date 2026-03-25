@@ -911,7 +911,11 @@ const SettingsPanel=({open,onClose,imp,setImp,lowSig,setLowSig,themePref,setThem
           
           <Cat c="Connectivity"/>
           <Row Icon={I.Wifi0} title="Low Signal Mode" sub="Disables map, strips animations"
-            right={<Toggle on={lowSig} onChange={setLowSig}/>} />
+            right={<Toggle on={lowSig} onChange={(v) => {
+              setLowSig(v);
+              // Close settings automatically to show the user the new low-signal home screen
+              if (v) onClose();
+            }}/>} />
             
           <Cat c="System Status"/>
           <Row Icon={I.Pin} title="Location Permission" 
@@ -1275,3 +1279,4 @@ else _mount();
 </script>
 </body>
 </html>
+
