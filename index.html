@@ -195,7 +195,7 @@
 const {useState,useEffect,useRef,useCallback,useMemo} = React;
 
 /* ═══════════════════════════════════════════════════════
-   DYNAMIC MAPS LOADER (Secure Vercel Setup)
+   DYNAMIC MAPS LOADER
 ═══════════════════════════════════════════════════════ */
 let _mapPromise = null;
 const loadGoogleMaps = async () => {
@@ -254,7 +254,7 @@ const getWeatherTint = (condition) => {
 };
 
 /* ═══════════════════════════════════════════════════════
-   MAP CONSTANTS (Official Google Night Mode preset)
+   MAP CONSTANTS
 ═══════════════════════════════════════════════════════ */
 const DARK_MAP_STYLES = [
   { elementType: "geometry", stylers: [{ color: "#242f3e" }] },
@@ -420,7 +420,7 @@ const fetchWeather = async (lat, lon) => {
 };
 
 /* ═══════════════════════════════════════════════════════
-   AQI
+   AQI HELPERS
 ═══════════════════════════════════════════════════════ */
 const AQI_L=[
   {max:50,label:"Good",color:"#22c55e"},{max:100,label:"Moderate",color:"#eab308"},
@@ -490,9 +490,8 @@ const SL=({t})=>(
 const MapHero=({isDark,coords,activeLocation,lowSig,onDisableLowSig})=>{
   const mapRef=useRef(null), instRef=useRef(null), markerRef=useRef(null);
 
-  // ALL hooks must come before any conditional return — Rules of Hooks
   useEffect(()=>{
-    if(lowSig) return; // don't init map in low signal mode
+    if(lowSig) return;
     let attempts=0,fallbackTimer=null,tilesListener=null,retryTimer=null,unmounted=false;
     const tryInit= async ()=>{
       try{
@@ -559,7 +558,6 @@ const MapHero=({isDark,coords,activeLocation,lowSig,onDisableLowSig})=>{
     }catch(e){}
   },[isDark]);
 
-  // Conditional render AFTER all hooks
   if(lowSig){
     return(
       <div style={{height:"220px",borderRadius:"20px",background:"linear-gradient(160deg,#1a2a4a,#0d1828)",display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"center",padding:"20px",border:"1px solid var(--border-light)",position:"relative"}}>
@@ -644,7 +642,7 @@ const HeroCard=({cw,location,imp})=>(
 );
 
 /* ═══════════════════════════════════════════════════════
-   STAT GRID — 2x2
+   STAT GRID
 ═══════════════════════════════════════════════════════ */
 const StatGrid=({cw,imp})=>{
   const stats=[
@@ -913,24 +911,16 @@ const SettingsPanel=({open,onClose,imp,setImp,lowSig,setLowSig,themePref,setThem
           <Row Icon={I.Wifi0} title="Low Signal Mode" sub="Disables map, strips animations"
             right={<Toggle on={lowSig} onChange={(v) => {
               setLowSig(v);
-              // Close settings automatically to show the user the new low-signal home screen
-              if (v) onClose();
+              if (v) {
+                onClose();
+                window.scrollTo({ top: 0, behavior: 'instant' });
+              }
             }}/>} />
             
           <Cat c="System Status"/>
           <Row Icon={I.Pin} title="Location Permission" 
             sub={geoState==="got" ? "Location active" : "Location denied — using default"}
             right={<div style={{width:"8px",height:"8px",borderRadius:"50%",background:geoState==="got"?"#22c55e":"#ef4444"}}/>} />
-            
-          <Cat c="Notifications"/>
-          <Row Icon={I.Bell} title="Severe Weather Alerts"
-            sub={notifPerm==="granted"?"Active":notifPerm==="denied"?"Blocked — check browser settings":"Tap to enable"}
-            right={notifPerm==="granted"
-              ? <div style={{width:"7px",height:"7px",borderRadius:"50%",background:"#22c55e"}}/>
-              : notifPerm==="denied"
-                ? <span style={{fontSize:"11px",color:"#ef4444"}}>Blocked</span>
-                : <button onClick={onRequestNotif} style={{padding:"6px 12px",borderRadius:"16px",border:"none",cursor:"pointer",fontSize:"12px",fontWeight:600,background:"#48C6EF",color:"var(--text-main)"}}>Enable</button>
-            } />
             
           <Cat c="About"/>
           <div onClick={()=>setShowLegal(true)} style={{cursor:"pointer"}}>
@@ -969,25 +959,6 @@ const SettingsPanel=({open,onClose,imp,setImp,lowSig,setLowSig,themePref,setThem
 };
 
 /* ═══════════════════════════════════════════════════════
-   NOTIFICATION HOOK
-═══════════════════════════════════════════════════════ */
-const useWeatherAlerts=(alerts,scene)=>{
-  const notifiedRef=useRef(new Set());
-  useEffect(()=>{
-    if(!alerts?.length||!("Notification" in window)||Notification.permission!=="granted") return;
-    const timer=setTimeout(()=>{
-      alerts.forEach(a=>{
-        const key=`${scene}:${a.id}`;
-        if(notifiedRef.current.has(key)) return;
-        notifiedRef.current.add(key);
-        new Notification(a.title,{body:a.desc,icon:"/icon-192.png",tag:`breeze-${a.id}`});
-      });
-    },1500);
-    return()=>clearTimeout(timer);
-  },[scene]);
-};
-
-/* ═══════════════════════════════════════════════════════
    WELCOME OVERLAY
 ═══════════════════════════════════════════════════════ */
 const WelcomeOverlay=({onComplete})=>{
@@ -1000,9 +971,6 @@ const WelcomeOverlay=({onComplete})=>{
       if(!navigator.geolocation){resolve();return;}
       navigator.geolocation.getCurrentPosition(resolve,resolve,{timeout:8000});
     });
-    if("Notification" in window&&Notification.permission==="default"){
-      try{await Notification.requestPermission();}catch{}
-    }
     try{localStorage.setItem("breeze_onboarded","true");}catch{}
     setExiting(true);
     setTimeout(()=>onComplete(),400);
@@ -1014,19 +982,11 @@ const WelcomeOverlay=({onComplete})=>{
         <div style={{fontSize:"44px",marginBottom:"20px"}}>🌤️</div>
         <div style={{fontFamily:"'Urbanist',sans-serif",fontSize:"24px",fontWeight:800,color:"var(--text-main)",letterSpacing:"-0.02em",marginBottom:"10px"}}>Welcome to Breeze</div>
         <div style={{fontSize:"14px",color:"var(--text-sub)",lineHeight:"1.65",marginBottom:"28px"}}>
-          For hyper-local weather and alerts, Breeze needs your{" "}
-          <span style={{color:"var(--text-main)"}}>location and notification</span> permissions.
-        </div>
-        <div style={{display:"flex",gap:"8px",justifyContent:"center",marginBottom:"24px",flexWrap:"wrap"}}>
-          {[["📍","Location"],["🔔","Alerts"]].map(([icon,label])=>(
-            <div key={label} style={{display:"flex",alignItems:"center",gap:"5px",padding:"5px 11px",borderRadius:"20px",background:"rgba(72,198,239,0.08)",border:"1px solid rgba(72,198,239,0.18)"}}>
-              <span style={{fontSize:"12px"}}>{icon}</span>
-              <span style={{fontSize:"11.5px",color:"var(--text-main)",fontWeight:500}}>{label}</span>
-            </div>
-          ))}
+          For hyper-local weather, Breeze needs your{" "}
+          <span style={{color:"var(--text-main)"}}>location</span> permissions.
         </div>
         <button onClick={go} disabled={step==="requesting"}
-          style={{width:"100%",padding:"14px",borderRadius:"14px",border:"none",cursor:step==="requesting"?"default":"pointer",fontFamily:"'Urbanist',sans-serif",fontSize:"15px",fontWeight:700,background:step==="requesting"?"rgba(72,198,239,0.2)":"#48C6EF",color:step==="requesting"?"rgba(72,198,239,0.7)":"white",display:"flex",alignItems:"center",justifyContent:"center",gap:"8px"}}>
+          style={{width:"100%",padding:"14px",borderRadius:"14px",border:"none",cursor:step==="requesting"?"default":"pointer",fontFamily:"'Urbanist',sans-serif",fontSize:"15px",fontWeight:700,background:step==="requesting"?"rgba(72,198,239,0.2)":"#48C6EF",color:"white",display:"flex",alignItems:"center",justifyContent:"center",gap:"8px"}}>
           {step==="requesting"&&<div className="spin" style={{width:"15px",height:"15px",borderRadius:"50%",border:"2px solid rgba(72,198,239,.3)",borderTopColor:"#48C6EF"}}/>}
           {step==="requesting"?"Requesting…":"Grant Permissions"}
         </button>
@@ -1043,26 +1003,12 @@ const WelcomeOverlay=({onComplete})=>{
    ROOT APP
 ═══════════════════════════════════════════════════════ */
 const App=()=>{
-  const [onboarded,setOnboarded]=useState(()=>{
-    try{
-      const s=localStorage.getItem("breeze_onboarded")==="true";
-      if(!s) return false;
-      const ok="Notification" in window?Notification.permission!=="default":true;
-      return ok;
-    }catch{return false;}
-  });
-  
+  const [onboarded,setOnboarded]=useState(()=>localStorage.getItem("breeze_onboarded")==="true");
   const [imp,setImp]=useState(()=>localStorage.getItem("bz_imp")==="true");
   const [themePref,setThemePref]=useState(()=>localStorage.getItem("bz_theme")||"system");
-  const [lowSig,setLowSig]=useState(()=>{
-    const saved = localStorage.getItem("bz_lowsig");
-    if(saved !== null) return saved==="true";
-    try{return(navigator.hardwareConcurrency||4)<4;}catch{return false;}
-  });
-  
+  const [lowSig,setLowSig]=useState(()=>localStorage.getItem("bz_lowsig")==="true");
   const [sysDark,setSysDark]=useState(()=>window.matchMedia("(prefers-color-scheme:dark)").matches);
   const [settOpen,setSettOpen]=useState(false);
-  const [notifPerm,setNotifPerm]=useState(()=>"Notification" in window?Notification.permission:"denied");
 
   const [coords,setCoords]=useState({lat:11.5728,lon:76.0808});
   const [geoState,setGeoState]=useState("pending");
@@ -1082,51 +1028,26 @@ const App=()=>{
   useEffect(()=>{ localStorage.setItem("bz_lowsig",lowSig); },[lowSig]);
 
   useEffect(()=>{
-    const mq=window.matchMedia("(prefers-color-scheme:dark)");
-    const h=e=>setSysDark(e.matches);
-    if(mq.addEventListener) mq.addEventListener("change",h);
-    else mq.addListener(h);
-    return()=>{
-      if(mq.removeEventListener) mq.removeEventListener("change",h);
-      else mq.removeListener(h);
-    };
-  },[]);
-
-  useEffect(()=>{
     const dark=resolveTheme(themePref,sysDark)==="dark";
     document.documentElement.setAttribute("data-theme",dark?"dark":"light");
-  },[themePref,sysDark]);
-
-  useEffect(()=>{
     if(lowSig) document.documentElement.classList.add("low-signal");
     else document.documentElement.classList.remove("low-signal");
-  },[lowSig]);
-
-  useEffect(()=>{
-    const lock=settOpen||!onboarded;
-    document.body.style.overflow=lock?"hidden":"";
-    document.body.style.touchAction=lock?"none":"";
-    return()=>{document.body.style.overflow="";document.body.style.touchAction="";};
-  },[settOpen,onboarded]);
+  },[themePref,sysDark,lowSig]);
 
   useEffect(()=>{
     if(!onboarded) return;
-    try{
-      if(!navigator.geolocation){setGeoState("denied");return;}
+    if(navigator.geolocation){
       navigator.geolocation.getCurrentPosition(
-        pos=>{try{setCoords({lat:pos.coords.latitude,lon:pos.coords.longitude});setGeoState("got");}catch{}},
-        ()=>setGeoState("denied"),
-        {timeout:8000,maximumAge:60000}
+        pos=>{setCoords({lat:pos.coords.latitude,lon:pos.coords.longitude});setGeoState("got");},
+        ()=>setGeoState("denied"),{timeout:8000}
       );
-    }catch{setGeoState("denied");}
+    }
   },[onboarded]);
 
   useEffect(()=>{
-    let cancelled=false;
     const load=async()=>{
-      setWeatherLoading(true);setWeatherError(null);
+      setWeatherLoading(true);
       const data=await fetchWeather(coords.lat,coords.lon);
-      if(cancelled) return;
       if(data){
         setLiveWeather(data.currentWeather);setLiveHourly(data.hourly);
         setLiveDaily(data.daily);setLiveAqi(data.aqi);setLiveSunMoon(data.sun_moon);
@@ -1137,20 +1058,15 @@ const App=()=>{
       setWeatherLoading(false);
     };
     load();
-    return()=>{cancelled=true;};
   },[coords.lat,coords.lon]);
 
   const isDark=resolveTheme(themePref,sysDark)==="dark";
-  const scene=liveWeather?.isStorm?"storm":"clear";
-  const cw=liveWeather||{temperature:"--",feelslike:"--",humidity:"--",windspeed:"--",uv_index:"--",visibility:"--",precipitation:"--",pressure:"--",dewPoint:"--",icon:"🌡️",condition:weatherLoading?"Loading…":"—",isStorm:false};
+  const cw=liveWeather||{temperature:"--",feelslike:"--",humidity:"--",windspeed:"--",uv_index:"--",visibility:"--",precipitation:"--",pressure:"--",dewPoint:"--",icon:"🌡️",condition:"Loading…"};
   const aqi=liveAqi||{value:null,pollutant:"AQI"};
-  const sun_moon=liveSunMoon||{sunrise:"06:00",sunset:"18:00",daylight_hours:12,moon_emoji:"🌙"};
-  const displayLocation=activeLocation||{village:"Breeze",district:weatherLoading?"Loading…":"Wayanad",state:"Kerala"};
+  const sun_moon=liveSunMoon||{sunrise:"06:00",sunset:"18:00",daylight_hours:12};
 
   const handleSearch=useCallback(async q=>{
     if(!q?.trim()) return;
-    setSearchError(null);
-    setActiveLocation({village:q,district:"Searching…",state:"",display:q});
     setWeatherLoading(true);
     try{
       const geo=await geocodeWithOSM(q);
@@ -1158,125 +1074,60 @@ const App=()=>{
       setActiveLocation({village:geo.village,district:geo.district,state:geo.state,display:geo.display});
     }catch(e){
       setSearchError(e.message);
-      setActiveLocation(null);
       setWeatherLoading(false);
     }
   },[]);
 
   return(
-    <div style={{minHeight:"100vh",fontFamily:"'DM Sans',sans-serif"}}>
-      {weatherLoading&&!liveWeather&&(
-        <div style={{position:"fixed",inset:0,zIndex:50,background:"rgba(0,0,0,0.4)",display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"center",backdropFilter:"blur(8px)",gap:"14px"}}>
-          <div className="spin" style={{width:"28px",height:"28px",borderRadius:"50%",border:"3px solid rgba(72,198,239,.25)",borderTopColor:"#48C6EF"}}/>
-          <div style={{fontSize:"14px",fontWeight:300,color:"var(--text-sub)",letterSpacing:"0.03em"}}>Fetching weather…</div>
-        </div>
-      )}
-
-      <div style={{minHeight:"100dvh",padding:"16px",paddingTop:`calc(var(--sat,0px) + 16px)`,paddingBottom:`calc(var(--sab,0px) + 16px)`,display:"flex",flexDirection:"column",gap:"12px"}}>
-        <SearchBar location={displayLocation} onSearch={handleSearch} onSettings={()=>setSettOpen(true)} loading={weatherLoading&&!!liveWeather}/>
-
-        {searchError&&(
-          <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",padding:"10px 14px",borderRadius:"12px",background:"rgba(239,68,68,0.1)",border:"1px solid rgba(239,68,68,0.2)"}}>
-            <span style={{fontSize:"12px",color:"#fca5a5"}}>🔍 {searchError}</span>
-            <button onClick={()=>setSearchError(null)} style={{background:"none",border:"none",cursor:"pointer",color:"var(--text-dim)",fontSize:"16px",padding:"0 2px"}}>×</button>
-          </div>
-        )}
-        {weatherError&&(
-          <div style={{padding:"10px 14px",borderRadius:"12px",background:"rgba(239,68,68,0.08)",border:"1px solid rgba(239,68,68,0.15)",fontSize:"12px",color:"rgba(255,150,150,0.8)"}}>⚠️ {weatherError}</div>
-        )}
+    <div style={{minHeight:"100vh"}}>
+      <div style={{minHeight:"100dvh",padding:"16px",paddingTop:`calc(var(--sat,0px) + 16px)`,display:"flex",flexDirection:"column",gap:"12px"}}>
+        <SearchBar location={activeLocation} onSearch={handleSearch} onSettings={()=>setSettOpen(true)} loading={weatherLoading}/>
 
         {lowSig ? (
-          /* ── LOW SIGNAL LAYOUT: only the hero card + a subtle exit banner ── */
           <div style={{display:"flex",flexDirection:"column",gap:"12px"}}>
-            <HeroCard cw={cw} location={displayLocation} imp={imp}/>
-            {/* Low signal exit banner */}
-            <div style={{
-              display:"flex",alignItems:"center",justifyContent:"space-between",
-              padding:"10px 14px",borderRadius:"14px",
-              background:isDark?"rgba(255,255,255,0.05)":"rgba(0,0,0,0.04)",
-              border:`1px solid ${isDark?"rgba(255,255,255,0.1)":"rgba(0,0,0,0.08)"}`,
-            }}>
+            <HeroCard cw={cw} location={activeLocation} imp={imp}/>
+            <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",padding:"10px 14px",borderRadius:"14px",background:"var(--thin)",border:"1px solid var(--border-light)"}}>
               <div style={{display:"flex",alignItems:"center",gap:"8px"}}>
                 <I.Wifi0 s={13} c="var(--text-dim)"/>
-                <span style={{fontSize:"12px",color:"var(--text-dim)",fontWeight:500}}>Low Signal Mode</span>
+                <span style={{fontSize:"12px",color:"var(--text-dim)",fontWeight:500}}>Low Signal Home</span>
               </div>
-              <button onClick={()=>setLowSig(false)} style={{
-                width:"28px",height:"28px",borderRadius:"50%",
-                background:isDark?"rgba(255,255,255,0.08)":"rgba(0,0,0,0.06)",
-                border:`1px solid ${isDark?"rgba(255,255,255,0.14)":"rgba(0,0,0,0.1)"}`,
-                display:"flex",alignItems:"center",justifyContent:"center",
-                cursor:"pointer",padding:0,lineHeight:0,flexShrink:0,
-              }}>
+              <button onClick={()=>setLowSig(false)} style={{width:"28px",height:"28px",borderRadius:"50%",background:"var(--thin)",border:"1px solid var(--border-light)",display:"flex",alignItems:"center",justifyContent:"center",cursor:"pointer"}}>
                 <I.X s={13} c="var(--text-main)"/>
               </button>
             </div>
           </div>
         ) : (
-          /* ── NORMAL LAYOUT ── */
           <>
-            <MapHero isDark={isDark} coords={coords} activeLocation={displayLocation} lowSig={lowSig} onDisableLowSig={()=>setLowSig(false)}/>
-            <div key={`${coords.lat},${coords.lon}`} className={weatherLoading&&liveWeather?"updating":""} style={{display:"flex",flexDirection:"column",gap:"12px"}}>
-              <HeroCard cw={cw} location={displayLocation} imp={imp}/>
-              <StatGrid cw={cw} imp={imp}/>
-              <ExtMetrics cw={cw}/>
-              <HourlyScroll hourly={liveHourly} imp={imp}/>
-              <div style={{display:"flex",gap:"12px"}}>
-                <AQICard aqi={aqi}/>
-                <SunCard sun_moon={sun_moon}/>
-              </div>
-              <DailyAccordion daily={liveDaily} imp={imp}/>
+            <MapHero isDark={isDark} coords={coords} activeLocation={activeLocation} lowSig={lowSig} onDisableLowSig={()=>setLowSig(false)}/>
+            <HeroCard cw={cw} location={activeLocation} imp={imp}/>
+            <StatGrid cw={cw} imp={imp}/>
+            <ExtMetrics cw={cw}/>
+            <HourlyScroll hourly={liveHourly} imp={imp}/>
+            <div style={{display:"flex",gap:"12px"}}>
+              <AQICard aqi={aqi}/>
+              <SunCard sun_moon={sun_moon}/>
             </div>
-            <div style={{textAlign:"center",fontSize:"10.5px",color:"var(--text-dim)",paddingTop:"4px"}}>
-              {geoState==="got"?`📍 ${coords?.lat?.toFixed(4)}°N ${coords?.lon?.toFixed(4)}°E · Live`:"Breeze · Open-Meteo · OSM"}
-            </div>
+            <DailyAccordion daily={liveDaily} imp={imp}/>
           </>
         )}
       </div>
 
-      <SettingsPanel open={settOpen} onClose={()=>setSettOpen(false)}
-        imp={imp} setImp={setImp} lowSig={lowSig} setLowSig={setLowSig}
-        themePref={themePref} setThemePref={setThemePref}
-        notifPerm={notifPerm} geoState={geoState}
-        onRequestNotif={async()=>{if(!("Notification" in window))return;const p=await Notification.requestPermission();setNotifPerm(p);}}/>
+      <SettingsPanel open={settOpen} onClose={()=>setSettOpen(false)} imp={imp} setImp={setImp} lowSig={lowSig} setLowSig={setLowSig} themePref={themePref} setThemePref={setThemePref} geoState={geoState}/>
 
-      {!onboarded&&(
-        <WelcomeOverlay onComplete={()=>{
-          setOnboarded(true);
-          if(navigator.geolocation) navigator.geolocation.getCurrentPosition(
-            pos=>{setCoords({lat:pos.coords.latitude,lon:pos.coords.longitude});setGeoState("got");},
-            ()=>setGeoState("denied"),{timeout:8000,maximumAge:60000}
-          );
-          if("Notification" in window) setNotifPerm(Notification.permission);
-        }}/>
-      )}
+      {!onboarded && <WelcomeOverlay onComplete={()=>setOnboarded(true)}/>}
     </div>
   );
 };
 
-class ErrorBoundary extends React.Component {
-  constructor(props){super(props);this.state={hasError:false,error:null};}
-  static getDerivedStateFromError(e){return{hasError:true,error:e};}
-  render(){
-    if(this.state.hasError) return(
-      <div style={{minHeight:"100vh",display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"center",background:"#0a0f1e",color:"var(--text-main)",padding:"24px",textAlign:"center",fontFamily:"'DM Sans',sans-serif"}}>
-        <div style={{fontSize:"36px",marginBottom:"14px"}}>⚠️</div>
-        <div style={{fontSize:"17px",fontWeight:700,marginBottom:"8px"}}>Breeze encountered an error</div>
-        <div style={{fontSize:"13px",opacity:.4,marginBottom:"22px"}}>{this.state.error?.message||"Unknown error"}</div>
-        <button onClick={()=>window.location.reload()} style={{padding:"10px 22px",borderRadius:"12px",border:"none",cursor:"pointer",background:"#48C6EF",color:"var(--text-main)",fontWeight:600,fontSize:"14px"}}>Reload App</button>
-      </div>
-    );
-    return this.props.children;
-  }
-}
-
 const _mount=()=>{
   const el=document.getElementById("root");
-  if(!el){return;}
-  ReactDOM.createRoot(el).render(<ErrorBoundary><App/></ErrorBoundary>);
+  if(!el) return;
+  ReactDOM.createRoot(el).render(<App/>);
 };
 if(document.readyState==="loading") document.addEventListener("DOMContentLoaded",_mount);
 else _mount();
 </script>
 </body>
 </html>
+
 
