@@ -157,8 +157,8 @@
     @keyframes slideIn{from{transform:translateX(100%)}to{transform:none}}
     .panel-in{animation:slideIn .32s cubic-bezier(.32,.72,0,1) both;}
 
-    .seg{display:flex;background:var(--thin);border-radius:12px;padding:4px;gap:3px;}
-    .seg-btn{flex:1;padding:10px 8px;border-radius:10px;border:none;cursor:pointer;font-family:'DM Sans',sans-serif;font-size:13px;font-weight:500;transition:background .15s,color .15s;}
+    .seg{display:flex;background:var(--thin);border-radius:16px;padding:6px;gap:6px;}
+    .seg-btn{flex:1;padding:12px 8px;border-radius:12px;border:none;cursor:pointer;font-family:'DM Sans',sans-serif;font-size:14px;font-weight:600;transition:background .15s,color .15s;}
 
     .section-label{
       display:flex;align-items:center;gap:10px;
@@ -476,13 +476,17 @@ const SL=({t})=>(
 /* ═══════════════════════════════════════════════════════
    MAP HERO
 ═══════════════════════════════════════════════════════ */
-const MapHero=({isDark,coords,activeLocation,lowSig})=>{
+const MapHero=({isDark,coords,activeLocation,lowSig,onDisableLowSig})=>{
   const mapRef=useRef(null), instRef=useRef(null), markerRef=useRef(null);
 
   if(lowSig){
     return(
-      <div style={{height:"220px",borderRadius:"20px",background:"linear-gradient(160deg,#1a2a4a,#0d1828)",display:"flex",alignItems:"flex-end",padding:"16px"}}>
-        <span style={{fontSize:"12px",color:"var(--text-dim)"}}>Map unavailable in Low Signal mode</span>
+      <div style={{height:"220px",borderRadius:"20px",background:"linear-gradient(160deg,#1a2a4a,#0d1828)",display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"center",padding:"16px",border:"1px solid var(--border-light)"}}>
+        <div style={{marginBottom:"12px", opacity:0.6}}><I.Wifi0 s={32} c="var(--text-main)"/></div>
+        <span style={{fontSize:"13px",color:"var(--text-dim)",marginBottom:"16px"}}>Map unavailable in Low Signal mode</span>
+        <button onClick={onDisableLowSig} style={{padding:"10px 20px", borderRadius:"20px", background:"var(--thin)", border:"1px solid var(--border-light)", color:"var(--text-main)", fontSize:"12px", fontWeight:600, cursor:"pointer", transition:"background 0.2s"}}>
+          Turn Off Low Signal Mode
+        </button>
       </div>
     );
   }
@@ -815,13 +819,12 @@ const DailyAccordion=({daily,imp})=>{
 ═══════════════════════════════════════════════════════ */
 const PanelHeader=({title,subtitle,onBack,backIcon})=>(
   <div style={{
-    padding:"calc(var(--sat,0px) + 32px) calc(var(--sal,0px) + 36px) 0",
+    padding:"calc(var(--sat,0px) + 24px) 24px 0",
     display:"flex",alignItems:"center",justifyContent:"space-between",
-    gap:"24px",
     marginBottom:"24px",
   }}>
     <div style={{display:"flex",flexDirection:"column",justifyContent:"center"}}>
-      <div style={{fontFamily:"'Urbanist',sans-serif",fontSize:"24px",fontWeight:800,
+      <div style={{fontFamily:"'Urbanist',sans-serif",fontSize:"26px",fontWeight:800,
         lineHeight:"1.1",letterSpacing:"-0.02em",color:"var(--text-main)"}}>
         {title}
       </div>
@@ -833,6 +836,7 @@ const PanelHeader=({title,subtitle,onBack,backIcon})=>(
       width:"34px",height:"34px",borderRadius:"50%",background:"var(--thin)",
       border:"1px solid var(--border-light)",display:"flex",alignItems:"center",
       justifyContent:"center",cursor:"pointer",flexShrink:0,lineHeight:0,
+      padding:0
     }}>
       {backIcon||<I.X s={16} c="var(--text-main)"/>}
     </button>
@@ -870,23 +874,27 @@ const SettingsPanel=({open,onClose,imp,setImp,lowSig,setLowSig,themePref,setThem
       <div className="panel-in" style={{position:"fixed",top:0,right:0,bottom:0,width:"min(360px,94vw)",background:"rgba(20,25,40,0.88)",borderLeft:"1px solid var(--border-light)",zIndex:200,overflowY:"auto",paddingBottom:"max(24px,var(--sab,24px))"}}>
         {!showLegal&&<>
         <PanelHeader title="Settings" subtitle="Breeze v0.12.0" onBack={onClose}/>
-        <div style={{padding:"0 calc(var(--sal,0px) + 36px)"}}>
+        <div style={{padding:"0 24px"}}>
+          
+          <Cat c="Appearance"/>
+          <div style={{padding:"12px 0",borderBottom:"1px solid var(--divider)"}}>
+            <div style={{fontSize:"13px",fontWeight:500,color:"var(--text-main)",marginBottom:"12px"}}>Theme</div>
+            <SegCtrl options={THEME_OPTS} value={themePref} onChange={setThemePref}/>
+          </div>
+          
+          <Cat c="Units"/>
+          <Row Icon={I.Sun2} title="Measurement" sub={imp?"Imperial — °F, mph":"Metric — °C, km/h"}
+            right={<div style={{display:"flex",alignItems:"center",gap:"8px"}}><span style={{fontSize:"11px",color:"var(--text-sub)"}}>{imp?"°F":"°C"}</span><Toggle on={imp} onChange={setImp}/></div>}/>
+          
+          <Cat c="Connectivity"/>
+          <Row Icon={I.Wifi0} title="Low Signal Mode" sub="Disables map, strips animations"
+            right={<Toggle on={lowSig} onChange={setLowSig}/>} />
+            
           <Cat c="System Status"/>
           <Row Icon={I.Pin} title="Location Permission" 
             sub={geoState==="got" ? "Location active" : "Location denied — using default"}
             right={<div style={{width:"8px",height:"8px",borderRadius:"50%",background:geoState==="got"?"#22c55e":"#ef4444"}}/>} />
             
-          <Cat c="Appearance"/>
-          <div style={{padding:"12px 0",borderBottom:"1px solid var(--divider)"}}>
-            <div style={{fontSize:"13px",fontWeight:500,color:"var(--text-main)",marginBottom:"8px"}}>Theme</div>
-            <SegCtrl options={THEME_OPTS} value={themePref} onChange={setThemePref}/>
-          </div>
-          <Cat c="Units"/>
-          <Row Icon={I.Sun2} title="Measurement" sub={imp?"Imperial — °F, mph":"Metric — °C, km/h"}
-            right={<div style={{display:"flex",alignItems:"center",gap:"8px"}}><span style={{fontSize:"11px",color:"var(--text-sub)"}}>{imp?"°F":"°C"}</span><Toggle on={imp} onChange={setImp}/></div>}/>
-          <Cat c="Connectivity"/>
-          <Row Icon={I.Wifi0} title="Low Signal Mode" sub="Disables map, strips animations"
-            right={<Toggle on={lowSig} onChange={setLowSig}/>} last/>
           <Cat c="Notifications"/>
           <Row Icon={I.Bell} title="Severe Weather Alerts"
             sub={notifPerm==="granted"?"Active":notifPerm==="denied"?"Blocked — check browser settings":"Tap to enable"}
@@ -895,12 +903,14 @@ const SettingsPanel=({open,onClose,imp,setImp,lowSig,setLowSig,themePref,setThem
               : notifPerm==="denied"
                 ? <span style={{fontSize:"11px",color:"#ef4444"}}>Blocked</span>
                 : <button onClick={onRequestNotif} style={{padding:"6px 12px",borderRadius:"16px",border:"none",cursor:"pointer",fontSize:"12px",fontWeight:600,background:"#48C6EF",color:"var(--text-main)"}}>Enable</button>
-            } last/>
+            } />
+            
           <Cat c="About"/>
           <div onClick={()=>setShowLegal(true)} style={{cursor:"pointer"}}>
             <Row Icon={I.Leaf} title="Data Sources & Legal" sub="Open-Meteo · OSM · Google Maps"
               right={<I.Chev s={13} c="#48C6EF"/>} last/>
           </div>
+
         </div>
         </>}
       </div>
@@ -908,7 +918,7 @@ const SettingsPanel=({open,onClose,imp,setImp,lowSig,setLowSig,themePref,setThem
       {showLegal&&(
         <div className="panel-in" style={{position:"fixed",top:0,right:0,bottom:0,width:"min(360px,94vw)",background:"rgba(20,25,40,0.88)",borderLeft:"1px solid var(--border-light)",zIndex:300,overflowY:"auto",paddingBottom:"max(24px,var(--sab,24px))"}}>
           <PanelHeader title="Legal & Data Sources" onBack={()=>setShowLegal(false)}/>
-          <div style={{padding:"0 calc(var(--sal,0px) + 36px)"}}>
+          <div style={{padding:"0 24px"}}>
             {[
               {title:"Weather Forecasts",src:"Open-Meteo",url:"https://open-meteo.com",license:"CC BY 4.0",desc:"Free weather API — no API key required."},
               {title:"Geocoding",src:"OpenStreetMap Nominatim",url:"https://nominatim.openstreetmap.org",license:"ODbL",desc:"© OpenStreetMap contributors."},
@@ -924,13 +934,81 @@ const SettingsPanel=({open,onClose,imp,setImp,lowSig,setLowSig,themePref,setThem
                 <div style={{fontSize:"12px",color:"var(--text-sub)",lineHeight:"1.5"}}>{desc}</div>
               </div>
             ))}
-            <div style={{marginTop:"16px",padding:"12px",borderRadius:"10px",background:"var(--thin)",border:"1px solid var(--border-light)"}}>
-              <div style={{fontSize:"11px",color:"var(--text-dim)",lineHeight:"1.6"}}>Breeze is a non-commercial demo. All providers used within their free-tier terms.</div>
-            </div>
           </div>
         </div>
       )}
     </>
+  );
+};
+
+/* ═══════════════════════════════════════════════════════
+   NOTIFICATION HOOK
+═══════════════════════════════════════════════════════ */
+const useWeatherAlerts=(alerts,scene)=>{
+  const notifiedRef=useRef(new Set());
+  useEffect(()=>{
+    if(!alerts?.length||!("Notification" in window)||Notification.permission!=="granted") return;
+    const timer=setTimeout(()=>{
+      alerts.forEach(a=>{
+        const key=`${scene}:${a.id}`;
+        if(notifiedRef.current.has(key)) return;
+        notifiedRef.current.add(key);
+        new Notification(a.title,{body:a.desc,icon:"/icon-192.png",tag:`breeze-${a.id}`});
+      });
+    },1500);
+    return()=>clearTimeout(timer);
+  },[scene]);
+};
+
+/* ═══════════════════════════════════════════════════════
+   WELCOME OVERLAY
+═══════════════════════════════════════════════════════ */
+const WelcomeOverlay=({onComplete})=>{
+  const [exiting,setExiting]=useState(false);
+  const [step,setStep]=useState("idle");
+
+  const go=async()=>{
+    setStep("requesting");
+    await new Promise(resolve=>{
+      if(!navigator.geolocation){resolve();return;}
+      navigator.geolocation.getCurrentPosition(resolve,resolve,{timeout:8000});
+    });
+    if("Notification" in window&&Notification.permission==="default"){
+      try{await Notification.requestPermission();}catch{}
+    }
+    try{localStorage.setItem("breeze_onboarded","true");}catch{}
+    setExiting(true);
+    setTimeout(()=>onComplete(),400);
+  };
+
+  return(
+    <div className={exiting?"ob-out":""} style={{position:"fixed",inset:0,zIndex:400,display:"flex",alignItems:"center",justifyContent:"center",background:"rgba(5,8,20,0.85)",backdropFilter:"blur(24px)",WebkitBackdropFilter:"blur(24px)",padding:"24px"}}>
+      <div className="ob-in glass" style={{width:"100%",maxWidth:"340px",padding:"36px 28px 28px",textAlign:"center",borderColor:"rgba(72,198,239,0.2)"}}>
+        <div style={{fontSize:"44px",marginBottom:"20px"}}>🌤️</div>
+        <div style={{fontFamily:"'Urbanist',sans-serif",fontSize:"24px",fontWeight:800,color:"var(--text-main)",letterSpacing:"-0.02em",marginBottom:"10px"}}>Welcome to Breeze</div>
+        <div style={{fontSize:"14px",color:"var(--text-sub)",lineHeight:"1.65",marginBottom:"28px"}}>
+          For hyper-local weather and alerts, Breeze needs your{" "}
+          <span style={{color:"var(--text-main)"}}>location and notification</span> permissions.
+        </div>
+        <div style={{display:"flex",gap:"8px",justifyContent:"center",marginBottom:"24px",flexWrap:"wrap"}}>
+          {[["📍","Location"],["🔔","Alerts"]].map(([icon,label])=>(
+            <div key={label} style={{display:"flex",alignItems:"center",gap:"5px",padding:"5px 11px",borderRadius:"20px",background:"rgba(72,198,239,0.08)",border:"1px solid rgba(72,198,239,0.18)"}}>
+              <span style={{fontSize:"12px"}}>{icon}</span>
+              <span style={{fontSize:"11.5px",color:"var(--text-main)",fontWeight:500}}>{label}</span>
+            </div>
+          ))}
+        </div>
+        <button onClick={go} disabled={step==="requesting"}
+          style={{width:"100%",padding:"14px",borderRadius:"14px",border:"none",cursor:step==="requesting"?"default":"pointer",fontFamily:"'Urbanist',sans-serif",fontSize:"15px",fontWeight:700,background:step==="requesting"?"rgba(72,198,239,0.2)":"#48C6EF",color:step==="requesting"?"rgba(72,198,239,0.7)":"white",display:"flex",alignItems:"center",justifyContent:"center",gap:"8px"}}>
+          {step==="requesting"&&<div className="spin" style={{width:"15px",height:"15px",borderRadius:"50%",border:"2px solid rgba(72,198,239,.3)",borderTopColor:"#48C6EF"}}/>}
+          {step==="requesting"?"Requesting…":"Grant Permissions"}
+        </button>
+        <button onClick={()=>{try{localStorage.setItem("breeze_onboarded","true");}catch{}onComplete();}}
+          style={{background:"none",border:"none",cursor:"pointer",fontSize:"12px",color:"var(--text-dim)",marginTop:"14px",padding:"4px"}}>
+          Skip for now
+        </button>
+      </div>
+    </div>
   );
 };
 
@@ -1074,14 +1152,8 @@ const App=()=>{
         {weatherError&&(
           <div style={{padding:"10px 14px",borderRadius:"12px",background:"rgba(239,68,68,0.08)",border:"1px solid rgba(239,68,68,0.15)",fontSize:"12px",color:"rgba(255,150,150,0.8)"}}>⚠️ {weatherError}</div>
         )}
-        {lowSig&&(
-          <div style={{padding:"9px 14px",borderRadius:"12px",background:"rgba(255,190,0,0.1)",border:"1px solid rgba(255,190,0,0.2)",display:"flex",alignItems:"center",gap:"7px"}}>
-            <I.Wifi0 s={13} c="#FFBE00"/>
-            <span style={{fontSize:"12px",color:"#FFBE00"}}>Low Signal Mode active</span>
-          </div>
-        )}
 
-        <MapHero isDark={isDark} coords={coords} activeLocation={displayLocation} lowSig={lowSig}/>
+        <MapHero isDark={isDark} coords={coords} activeLocation={displayLocation} lowSig={lowSig} onDisableLowSig={() => setLowSig(false)}/>
 
         <div key={`${coords.lat},${coords.lon}`} className={weatherLoading&&liveWeather?"updating":""} style={{display:"flex",flexDirection:"column",gap:"12px"}}>
           <HeroCard cw={cw} location={displayLocation} imp={imp}/>
