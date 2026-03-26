@@ -160,7 +160,7 @@
     @keyframes slideIn{from{transform:translateX(100%)}to{transform:none}}
     .panel-in{animation:slideIn .32s cubic-bezier(.32,.72,0,1) both;}
 
-    .seg{display:flex;background:var(--thin);border-radius:16px;padding:6px;gap:6px;}
+    .seg{display:flex;background:rgba(120,130,160,0.2);border:1px solid var(--border-light);border-radius:16px;padding:6px;gap:6px;}
     .seg-btn{flex:1;padding:12px 8px;border-radius:12px;border:none;cursor:pointer;font-family:'DM Sans',sans-serif;font-size:14px;font-weight:600;transition:background .15s,color .15s;}
 
     /* ── Low Signal Mode — kill all motion ──────────────────── */
@@ -460,7 +460,7 @@ const G=({children,level=2,style={},onClick})=>{
 };
 
 const Toggle=({on,onChange})=>(
-  <div className="tog" style={{background:on?"#48C6EF":"var(--thin)"}} onClick={()=>onChange(!on)}>
+  <div className="tog" style={{background:on?"#48C6EF":"rgba(120,130,160,0.35)"}} onClick={()=>onChange(!on)}>
     <div className="tog-k" style={{transform:on?"translateX(21px)":"translateX(3px)"}}/>
   </div>
 );
@@ -981,12 +981,12 @@ const WelcomeOverlay=({onComplete})=>{
 
   return(
     <div className={exiting?"ob-out":""} style={{position:"fixed",inset:0,zIndex:400,display:"flex",alignItems:"center",justifyContent:"center",background:"rgba(5,8,20,0.85)",backdropFilter:"blur(24px)",WebkitBackdropFilter:"blur(24px)",padding:"24px"}}>
-      <div className="ob-in glass" style={{width:"100%",maxWidth:"340px",padding:"36px 28px 28px",textAlign:"center",borderColor:"rgba(72,198,239,0.2)"}}>
+      <div className="ob-in glass m-thick" style={{width:"100%",maxWidth:"340px",padding:"36px 28px 28px",textAlign:"center",background:"rgba(12,18,48,0.92)",borderColor:"rgba(72,198,239,0.25)"}}>
         <div style={{fontSize:"44px",marginBottom:"20px"}}>🌤️</div>
-        <div style={{fontFamily:"'Urbanist',sans-serif",fontSize:"24px",fontWeight:800,color:"var(--text-main)",letterSpacing:"-0.02em",marginBottom:"10px"}}>Welcome to Breeze</div>
-        <div style={{fontSize:"14px",color:"var(--text-sub)",lineHeight:"1.65",marginBottom:"28px"}}>
+        <div style={{fontFamily:"'Urbanist',sans-serif",fontSize:"24px",fontWeight:800,color:"#ffffff",letterSpacing:"-0.02em",marginBottom:"10px"}}>Welcome to Breeze</div>
+        <div style={{fontSize:"14px",color:"rgba(255,255,255,0.78)",lineHeight:"1.65",marginBottom:"28px"}}>
           For hyper-local weather, Breeze needs your{" "}
-          <span style={{color:"var(--text-main)"}}>location</span> permissions.
+          <span style={{color:"#ffffff",fontWeight:600}}>location</span> permissions.
         </div>
         <button onClick={go} disabled={step==="requesting"}
           style={{width:"100%",padding:"14px",borderRadius:"14px",border:"none",cursor:step==="requesting"?"default":"pointer",fontFamily:"'Urbanist',sans-serif",fontSize:"15px",fontWeight:700,background:step==="requesting"?"rgba(72,198,239,0.2)":"#48C6EF",color:"white",display:"flex",alignItems:"center",justifyContent:"center",gap:"8px"}}>
@@ -994,7 +994,7 @@ const WelcomeOverlay=({onComplete})=>{
           {step==="requesting"?"Requesting…":"Grant Permissions"}
         </button>
         <button onClick={()=>{try{localStorage.setItem("breeze_onboarded","true");}catch{}onComplete();}}
-          style={{background:"none",border:"none",cursor:"pointer",fontSize:"12px",color:"var(--text-dim)",marginTop:"14px",padding:"4px"}}>
+          style={{background:"none",border:"none",cursor:"pointer",fontSize:"12px",color:"rgba(255,255,255,0.35)",marginTop:"14px",padding:"4px"}}>
           Skip for now
         </button>
       </div>
@@ -1036,6 +1036,21 @@ const App=()=>{
     if(lowSig) document.documentElement.classList.add("low-signal");
     else document.documentElement.classList.remove("low-signal");
   },[themePref,sysDark,lowSig]);
+
+  // Lock background scroll when settings panel is open
+  useEffect(()=>{
+    if(settOpen){
+      document.body.style.overflow="hidden";
+      document.body.style.touchAction="none";
+    } else {
+      document.body.style.overflow="";
+      document.body.style.touchAction="";
+    }
+    return()=>{
+      document.body.style.overflow="";
+      document.body.style.touchAction="";
+    };
+  },[settOpen]);
 
   useEffect(()=>{
     if(!onboarded) return;
