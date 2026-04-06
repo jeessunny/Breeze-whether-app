@@ -16,17 +16,20 @@ jobs:
       - name: Setup Java 21
         uses: actions/setup-java@v4
         with:
-          distribution: 'microsoft' # Microsoft or Temurin both work for Java 21
+          distribution: 'temurin'
           java-version: '21'
 
       - name: Force Clean Build
         run: |
           rm -rf www android package.json capacitor.config.json package-lock.json node_modules
           mkdir www
-          cp index.html www/
+          # Copy your index.html into the web directory Capacitor expects
+          cp "index (11).html" www/index.html
+          
           npm init -y
           npm install @capacitor/core @capacitor/cli @capacitor/android
-          npx cap init "Breeze Weather" "com.jees.breezeweather" --web-dir www
+          
+          npx cap init "Breeze" "com.jees.breeze" --web-dir www
           npx cap add android
           npx cap copy android
 
