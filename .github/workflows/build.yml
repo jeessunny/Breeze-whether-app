@@ -21,14 +21,19 @@ jobs:
 
       - name: Force Clean Build
         run: |
+          # 1. Clear old files to prevent conflicts
           rm -rf www android package.json capacitor.config.json package-lock.json node_modules
-          mkdir www
-          # Copy your index.html into the web directory Capacitor expects
-          cp "index (11).html" www/index.html
           
+          # 2. Setup the folder structure Capacitor requires
+          mkdir www
+          # Using index.html (the name in your repo)
+          cp index.html www/index.html
+          
+          # 3. Initialize and install Capacitor
           npm init -y
           npm install @capacitor/core @capacitor/cli @capacitor/android
           
+          # 4. Initialize and add Android platform
           npx cap init "Breeze" "com.jees.breeze" --web-dir www
           npx cap add android
           npx cap copy android
@@ -39,7 +44,7 @@ jobs:
           chmod +x gradlew
           ./gradlew assembleDebug
 
-      - name: Upload APK
+      - name: Upload APK Artifact
         uses: actions/upload-artifact@v4
         with:
           name: Breeze-Weather-APK
