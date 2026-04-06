@@ -8,37 +8,24 @@ jobs:
       - name: Checkout Repository
         uses: actions/checkout@v4
 
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: 20
-
-      - name: Install Capacitor
-        run: |
-          npm init -y
-          npm install @capacitor/core @capacitor/cli @capacitor/android
-          npx cap init "Breeze Weather" "com.jees.breezeweather" --web-dir .
-
       - name: Setup Java 17
         uses: actions/setup-java@v4
         with:
           distribution: 'temurin'
           java-version: '17'
 
-      - name: Add Android Platform
-        run: |
-          npx cap add android
-          npx cap copy android
+      - name: Install Bubblewrap CLI
+        run: npm install -g @bubblewrap/cli
 
-      - name: Build APK with Gradle
+      - name: Initialize and Build APK
         run: |
-          cd android
-          chmod +x gradlew
-          ./gradlew assembleDebug
+          # This creates a lightweight TWA (Trusted Web Activity) APK
+          npx @bubblewrap/cli init --manifest=https://breeze-weather-jees.vercel.app/manifest.json --yes
+          npx @bubblewrap/cli build --yes
 
-      - name: Upload APK Artifact
-        uses: actions/upload-artifact@v4
+      - name: Upload APK
+* uses: actions/upload-artifact@v4
         with:
           name: Breeze-Weather-APK
-          path: android/app/build/outputs/apk/debug/app-debug.apk
+          path: ./*.apk
           
