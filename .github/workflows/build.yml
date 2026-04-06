@@ -1,11 +1,11 @@
-name: Build Android APK
+name: Build Breeze APK
 on: [push]
 
 jobs:
   build:
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout Repository
+      - name: Checkout Code
         uses: actions/checkout@v4
 
       - name: Setup Node.js
@@ -19,32 +19,39 @@ jobs:
           distribution: 'temurin'
           java-version: '21'
 
-      - name: Force Clean Build
+      - name: Prepare Environment & Capacitor
         run: |
-          # 1. Clear old files to prevent conflicts
+          # 1. Start from a fresh state to avoid file conflicts
           rm -rf www android package.json capacitor.config.json package-lock.json node_modules
           
-          # 2. Setup the folder structure Capacitor requires
+          # 2. Create the 'www' folder required by Capacitor
           mkdir www
-          # Using index.html (the name in your repo)
+          
+          # 3. Use the index.html from your repository
           cp index.html www/index.html
           
-          # 3. Initialize and install Capacitor
+          # 4. Initialize the Node environment
           npm init -y
-          npm install @capacitor/core @capacitor/cli @capacitor/android
+          npm install @capacitor/core@latest @capacitor/cli@latest @capacitor/android@latest
           
-          # 4. Initialize and add Android platform
+          # 5. Setup Capacitor project
           npx cap init "Breeze" "com.jees.breeze" --web-dir www
           npx cap add android
+          
+          # 6. Apply the FIX for 'Duplicate Class' Kotlin errors
+          # This forces all libraries to use a consistent Kotlin version
+          echo "configurations.all { resolutionStrategy.eachDependency { details -> if (details.requested.group == 'org.jetbrains.kotlin') { details.useVersion '1.9.10' } } }" >> android/build.gradle
+
+          # 7. Finalize assets
           npx cap copy android
 
-      - name: Build APK
+      - name: Compile Pure APK
         run: |
           cd android
           chmod +x gradlew
           ./gradlew assembleDebug
 
-      - name: Upload APK Artifact
+      - name: Upload APK
         uses: actions/upload-artifact@v4
         with:
           name: Breeze-Weather-APK
