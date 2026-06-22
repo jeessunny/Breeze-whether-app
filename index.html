@@ -1142,13 +1142,23 @@ const WelcomeOverlay=({onComplete})=>{
 
   const go=async()=>{
     setStep("requesting");
+    let coords=null;
     await new Promise(resolve=>{
       if(!navigator.geolocation){resolve();return;}
-      navigator.geolocation.getCurrentPosition(resolve,resolve,{timeout:8000});
+      navigator.geolocation.getCurrentPosition(
+        pos=>{
+          coords={lat:pos.coords.latitude,lon:pos.coords.longitude};
+          resolve();
+        },
+        ()=>{
+          resolve();
+        },
+        {timeout:10000,maximumAge:60000}
+      );
     });
     try{localStorage.setItem("breeze_onboarded","true");}catch{}
     setExiting(true);
-    setTimeout(()=>onComplete(),400);
+    setTimeout(()=>onComplete(coords),400);
   };
 
   return(
@@ -1252,16 +1262,16 @@ const App=()=>{
       async pos => {
         const lat = pos.coords.latitude;
         const lon = pos.coords.longitude;
-        setCoords({ lat, lon });
         setGeoState("got");
-        try {
-          const loc = await reverseGeocodeOSM(lat, lon);
-          if (loc) {
-            setActiveLocation(loc);
+        
+        // Reset active location only if the coordinates changed to trigger reverse geocoding in weather load
+        setCoords(prev => {
+          if (prev.lat !== lat || prev.lon !== lon) {
+            setActiveLocation(null);
+            return { lat, lon };
           }
-        } catch (e) {
-          console.error("Failed to reverse geocode:", e);
-        }
+          return prev;
+        });
       },
       err => {
         console.warn("Geolocation error:", err);
@@ -1287,7 +1297,8 @@ const App=()=>{
     if (onboarded) {
       fetchGeoLocation(false);
     }
-  }, [onboarded, fetchGeoLocation]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   useEffect(()=>{
     const load=async()=>{
@@ -1415,7 +1426,18 @@ const App=()=>{
 
       <SettingsPanel open={settOpen} onClose={()=>setSettOpen(false)} imp={imp} setImp={setImp} lowSig={lowSig} setLowSig={setLowSig} themePref={themePref} setThemePref={setThemePref} geoState={geoState}/>
 
-      {!onboarded && <WelcomeOverlay onComplete={()=>setOnboarded(true)}/>}
+      {!onboarded && (
+        <WelcomeOverlay 
+          onComplete={(gotCoords)=>{
+            setOnboarded(true);
+            if (gotCoords) {
+              setActiveLocation(null);
+              setCoords(gotCoords);
+              setGeoState("got");
+            }
+          }}
+        />
+      )}
     </div>
   );
 };
