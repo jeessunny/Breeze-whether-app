@@ -305,6 +305,13 @@
       .page-inner{grid-template-columns:380px 1fr 360px;}
       .map-wrap{height:340px;}
     }
+    /* col-right is desktop-only — hide on mobile/tablet */
+    .col-right{ display:none; }
+    @media(min-width:1024px){
+      .col-right{ display:flex; }
+      /* hide the mobile-fallback duplicate cards that live inside col-left */
+      .desktop-hidden{ display:none; }
+    }
   </style>
 </head>
 <body>
@@ -1472,25 +1479,34 @@ const App=()=>{
             </div>
           ) : (
             <>
-              {/* ── LEFT sidebar: hero + AQI + Sun ── */}
+              {/* ── LEFT sidebar (desktop): big hero card only ── */}
               <div className="col-left">
                 <HeroCard cw={cw} location={activeLocation} imp={imp}/>
-                <div style={{display:"flex",gap:"12px"}}>
-                  <AQICard aqi={aqi}/>
-                  <SunCard sun_moon={sun_moon}/>
+                {/* On mobile these show inside col-left; on desktop they move to col-right via CSS order */}
+                <div className="desktop-hidden">
+                  <div style={{display:"flex",gap:"12px",marginTop:"14px"}}>
+                    <AQICard aqi={aqi}/>
+                    <SunCard sun_moon={sun_moon}/>
+                  </div>
+                  <div style={{marginTop:"14px"}}><StatGrid cw={cw} imp={imp}/></div>
+                  <div style={{marginTop:"14px"}}><ExtMetrics cw={cw}/></div>
                 </div>
-                <StatGrid cw={cw} imp={imp}/>
               </div>
 
-              {/* ── CENTRE: map + hourly + 7-day ── */}
+              {/* ── CENTRE (desktop): map + hourly + 7-day ── */}
               <div className="col-centre">
                 <MapHero isDark={isDark} coords={coords} activeLocation={activeLocation} lowSig={lowSig} onDisableLowSig={()=>setLowSig(false)}/>
                 <HourlyScroll hourly={liveHourly} imp={imp}/>
                 <DailyAccordion daily={liveDaily} imp={imp}/>
               </div>
 
-              {/* ── RIGHT sidebar: extended metrics ── */}
+              {/* ── RIGHT sidebar (desktop only): stats + AQI + Sun + metrics ── */}
               <div className="col-right">
+                <StatGrid cw={cw} imp={imp}/>
+                <div style={{display:"flex",gap:"12px"}}>
+                  <AQICard aqi={aqi}/>
+                  <SunCard sun_moon={sun_moon}/>
+                </div>
                 <ExtMetrics cw={cw}/>
               </div>
             </>
