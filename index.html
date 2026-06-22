@@ -630,7 +630,7 @@ const SearchBar=({location,onSearch,onSelectSuggestion,onSettings,loading})=>{
   const inputRef = useRef(null);
   const containerRef = useRef(null);
 
-  // Debounced autocomplete search
+  // Debounced autocomplete search using Photon API (OpenStreetMap data)
   useEffect(() => {
     if (q.trim().length < 1) {
       setSuggestions([]);
@@ -638,10 +638,10 @@ const SearchBar=({location,onSearch,onSelectSuggestion,onSettings,loading})=>{
     }
     const delayDebounceFn = setTimeout(async () => {
       try {
-        const response = await fetch(`https://geocoding-api.open-meteo.com/v1/search?name=${encodeURIComponent(q.trim())}&count=5&language=en&format=json`);
+        const response = await fetch(`https://photon.komoot.io/api/?q=${encodeURIComponent(q.trim())}&limit=5`);
         if (response.ok) {
           const data = await response.json();
-          setSuggestions(data.results || []);
+          setSuggestions(data.features || []);
         }
       } catch (err) {
         console.error("Autocomplete error:", err);
@@ -730,34 +730,47 @@ const SearchBar=({location,onSearch,onSelectSuggestion,onSettings,loading})=>{
           border: "1px solid var(--border-light)",
           borderRadius: "16px"
         }}>
-          {suggestions.map((item) => (
-            <button
-              key={item.id}
-              type="button"
-              onClick={() => handleSelect(item)}
-              style={{
-                background: "transparent",
-                border: "none",
-                color: "var(--text-main)",
-                padding: "10px 12px",
-                textAlign: "left",
-                borderRadius: "12px",
-                cursor: "pointer",
-                display: "flex",
-                flexDirection: "column",
-                gap: "2px",
-                transition: "background 0.2s",
-                lineHeight: "1.4"
-              }}
-              onMouseEnter={(e) => e.currentTarget.style.background = "var(--thin)"}
-              onMouseLeave={(e) => e.currentTarget.style.background = "transparent"}
-            >
-              <span style={{fontSize: "14px", fontWeight: "600", color: "var(--text-main)"}}>{item.name}</span>
-              <span style={{fontSize: "11px", color: "var(--text-sub)"}}>
-                {item.admin1 ? `${item.admin1}, ` : ""}{item.country}
-              </span>
-            </button>
-          ))}
+          {suggestions.map((item, idx) => {
+            const props = item.properties || {};
+            const coords = item.geometry?.coordinates || [0, 0];
+            const name = props.name || "";
+            const subparts = [props.city, props.state || props.county, props.country].filter(Boolean);
+            const filteredSubparts = subparts.filter(x => x.toLowerCase() !== name.toLowerCase());
+            const subtext = filteredSubparts.join(", ");
+            
+            return (
+              <button
+                key={idx}
+                type="button"
+                onClick={() => handleSelect({
+                  latitude: coords[1],
+                  longitude: coords[0],
+                  name: name,
+                  admin1: props.state || props.county || "",
+                  country: props.country || ""
+                })}
+                style={{
+                  background: "transparent",
+                  border: "none",
+                  color: "var(--text-main)",
+                  padding: "10px 12px",
+                  textAlign: "left",
+                  borderRadius: "12px",
+                  cursor: "pointer",
+                  display: "flex",
+                  flexDirection: "column",
+                  gap: "2px",
+                  transition: "background 0.2s",
+                  lineHeight: "1.4"
+                }}
+                onMouseEnter={(e) => e.currentTarget.style.background = "var(--thin)"}
+                onMouseLeave={(e) => e.currentTarget.style.background = "transparent"}
+              >
+                <span style={{fontSize: "14px", fontWeight: "600", color: "var(--text-main)"}}>{name}</span>
+                <span style={{fontSize: "11px", color: "var(--text-sub)"}}>{subtext}</span>
+              </button>
+            );
+          })}
         </div>
       )}
     </div>
@@ -1074,7 +1087,7 @@ const SettingsPanel=({open,onClose,imp,setImp,lowSig,setLowSig,themePref,setThem
             
           <Cat c="System Status"/>
           <Row Icon={I.Pin} title="Location Permission" 
-            sub={geoState==="got" ? "Location active" : "Location denied — using default"}
+            sub={geoState==="got" ? "Location active" : "Location denied — using last location"}
             right={<div style={{width:"8px",height:"8px",borderRadius:"50%",background:geoState==="got"?"#22c55e":"#ef4444"}}/>} />
             
           <Cat c="About"/>
@@ -1165,9 +1178,21 @@ const App=()=>{
   const [sysDark,setSysDark]=useState(()=>window.matchMedia("(prefers-color-scheme:dark)").matches);
   const [settOpen,setSettOpen]=useState(false);
 
-  const [coords,setCoords]=useState({lat:11.5728,lon:76.0808});
+  const [coords,setCoords]=useState(()=>{
+    try {
+      const last = localStorage.getItem("bz_last_coords");
+      if (last) return JSON.parse(last);
+    } catch(e) {}
+    return {lat:11.5728,lon:76.0808};
+  });
   const [geoState,setGeoState]=useState("pending");
-  const [activeLocation,setActiveLocation]=useState(null);
+  const [activeLocation,setActiveLocation]=useState(()=>{
+    try {
+      const last = localStorage.getItem("bz_last_location");
+      if (last) return JSON.parse(last);
+    } catch(e) {}
+    return null;
+  });
 
   const [liveWeather,setLiveWeather]=useState(null);
   const [liveHourly,setLiveHourly]=useState([]);
@@ -1229,18 +1254,31 @@ const App=()=>{
       if(data){
         setLiveWeather(data.currentWeather);setLiveHourly(data.hourly);
         setLiveDaily(data.daily);setLiveAqi(data.aqi);setLiveSunMoon(data.sun_moon);
-        if(!activeLocation) {
+        
+        let currentLoc = activeLocation;
+        if(!currentLoc) {
           try {
             const loc = await reverseGeocodeOSM(coords.lat, coords.lon);
             if (loc) {
+              currentLoc = loc;
               setActiveLocation(loc);
             } else {
-              setActiveLocation({...data.locationFromApi,display:data.locationFromApi.village});
+              currentLoc = {...data.locationFromApi,display:data.locationFromApi.village};
+              setActiveLocation(currentLoc);
             }
           } catch(e) {
-            setActiveLocation({...data.locationFromApi,display:data.locationFromApi.village});
+            currentLoc = {...data.locationFromApi,display:data.locationFromApi.village};
+            setActiveLocation(currentLoc);
           }
         }
+        
+        // Save successfully loaded coordinates and location to localStorage
+        try {
+          localStorage.setItem("bz_last_coords", JSON.stringify(coords));
+          if (currentLoc) {
+            localStorage.setItem("bz_last_location", JSON.stringify(currentLoc));
+          }
+        } catch(e) {}
       } else {
         setWeatherError("Could not load weather data.");
       }
