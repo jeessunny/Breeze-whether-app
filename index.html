@@ -623,25 +623,142 @@ const MapHero=({isDark,coords,activeLocation,lowSig,onDisableLowSig})=>{
 /* ═══════════════════════════════════════════════════════
    SEARCH BAR
 ═══════════════════════════════════════════════════════ */
-const SearchBar=({location,onSearch,onSettings,loading})=>{
+const SearchBar=({location,onSearch,onSelectSuggestion,onSettings,loading})=>{
   const [q,setQ]=useState("");
-  const submit=e=>{e.preventDefault();const v=q.trim();if(!v)return;onSearch(v);setQ("");};
+  const [suggestions, setSuggestions] = useState([]);
+  const [showSuggest, setShowSuggest] = useState(false);
+  const inputRef = useRef(null);
+  const containerRef = useRef(null);
+
+  // Debounced autocomplete search
+  useEffect(() => {
+    if (q.trim().length < 4) {
+      setSuggestions([]);
+      return;
+    }
+    const delayDebounceFn = setTimeout(async () => {
+      try {
+        const response = await fetch(`https://geocoding-api.open-meteo.com/v1/search?name=${encodeURIComponent(q.trim())}&count=5&language=en&format=json`);
+        if (response.ok) {
+          const data = await response.json();
+          setSuggestions(data.results || []);
+        }
+      } catch (err) {
+        console.error("Autocomplete error:", err);
+      }
+    }, 300); // 300ms debounce
+
+    return () => clearTimeout(delayDebounceFn);
+  }, [q]);
+
+  // Click outside to close suggestions
+  useEffect(() => {
+    const handleOutsideClick = (e) => {
+      if (containerRef.current && !containerRef.current.contains(e.target)) {
+        setShowSuggest(false);
+      }
+    };
+    document.addEventListener("click", handleOutsideClick);
+    return () => document.removeEventListener("click", handleOutsideClick);
+  }, []);
+
+  const submit=e=>{
+    e.preventDefault();
+    const v=q.trim();
+    if(!v)return;
+    onSearch(v);
+    setQ("");
+    setSuggestions([]);
+    setShowSuggest(false);
+    if(inputRef.current) {
+      inputRef.current.blur();
+    }
+  };
+
+  const handleSelect = (item) => {
+    onSelectSuggestion(item);
+    setQ("");
+    setSuggestions([]);
+    setShowSuggest(false);
+    if(inputRef.current) {
+      inputRef.current.blur();
+    }
+  };
+
   return(
-    <form onSubmit={submit} style={{display:"flex",alignItems:"center",gap:"0",overflow:"hidden"}} className="material m-regular">
-      <div style={{padding:"0 12px",flexShrink:0,display:"flex",alignItems:"center"}}>
-        {loading
-          ? <div className="spin" style={{width:"14px",height:"14px",borderRadius:"50%",border:"2px solid rgba(72,198,239,.3)",borderTopColor:"#48C6EF"}}/>
-          : <I.Search s={14} c="var(--text-sub)"/>}
-      </div>
-      <input type="search" className="srch" value={q} onChange={e=>setQ(e.target.value)}
-        placeholder={location?.display||location?.village||"Search location…"}
-        enterKeyHint="search" autoComplete="off" spellCheck="false"
-        style={{flex:1,padding:"12px 0",background:"transparent",border:"none",outline:"none",color:"var(--text-main)",fontSize:"14px",fontFamily:"'DM Sans',sans-serif"}}/>
-      <button type="button" onClick={onSettings}
-        style={{padding:"12px 14px",background:"none",border:"none",borderLeft:"1px solid var(--border-light)",cursor:"pointer",display:"flex",alignItems:"center",flexShrink:0}}>
-        <I.Cog s={17} c="var(--text-sub)"/>
-      </button>
-    </form>
+    <div ref={containerRef} style={{position:"relative", zIndex: 100, width: "100%"}}>
+      <form onSubmit={submit} style={{display:"flex",alignItems:"center",gap:"0",overflow:"hidden"}} className="material m-regular">
+        <div style={{padding:"0 12px",flexShrink:0,display:"flex",alignItems:"center"}}>
+          {loading
+            ? <div className="spin" style={{width:"14px",height:"14px",borderRadius:"50%",border:"2px solid rgba(72,198,239,.3)",borderTopColor:"#48C6EF"}}/>
+            : <I.Search s={14} c="var(--text-sub)"/>}
+        </div>
+        <input 
+          ref={inputRef}
+          type="search" 
+          className="srch" 
+          value={q} 
+          onChange={e=>{setQ(e.target.value); setShowSuggest(true);}}
+          onFocus={()=>setShowSuggest(true)}
+          placeholder={location?.display||location?.village||"Search location…"}
+          enterKeyHint="search" 
+          autoComplete="off" 
+          spellCheck="false"
+          style={{flex:1,padding:"12px 0",background:"transparent",border:"none",outline:"none",color:"var(--text-main)",fontSize:"14px",fontFamily:"'DM Sans',sans-serif"}}/>
+        <button type="button" onClick={onSettings}
+          style={{padding:"12px 14px",background:"none",border:"none",borderLeft:"1px solid var(--border-light)",cursor:"pointer",display:"flex",alignItems:"center",flexShrink:0}}>
+          <I.Cog s={17} c="var(--text-sub)"/>
+        </button>
+      </form>
+
+      {showSuggest && suggestions.length > 0 && (
+        <div className="glass m-thick panel-in" style={{
+          position: "absolute",
+          top: "calc(100% + 8px)",
+          left: 0,
+          right: 0,
+          maxHeight: "260px",
+          overflowY: "auto",
+          padding: "8px",
+          display: "flex",
+          flexDirection: "column",
+          gap: "4px",
+          boxShadow: "0 12px 30px rgba(0,0,0,0.35)",
+          backdropFilter: "blur(20px)",
+          WebkitBackdropFilter: "blur(20px)",
+          border: "1px solid var(--border-light)",
+          borderRadius: "16px"
+        }}>
+          {suggestions.map((item) => (
+            <button
+              key={item.id}
+              type="button"
+              onClick={() => handleSelect(item)}
+              style={{
+                background: "transparent",
+                border: "none",
+                color: "var(--text-main)",
+                padding: "10px 12px",
+                textAlign: "left",
+                borderRadius: "12px",
+                cursor: "pointer",
+                display: "flex",
+                flexDirection: "column",
+                gap: "2px",
+                transition: "background 0.2s"
+              }}
+              onMouseEnter={(e) => e.currentTarget.style.background = "var(--thin)"}
+              onMouseLeave={(e) => e.currentTarget.style.background = "transparent"}
+            >
+              <span style={{fontSize: "14px", fontWeight: "600", color: "var(--text-main)"}}>{item.name}</span>
+              <span style={{fontSize: "11px", color: "var(--text-sub)"}}>
+                {item.admin1 ? `${item.admin1}, ` : ""}{item.country}
+              </span>
+            </button>
+          ))}
+        </div>
+      )}
+    </div>
   );
 };
 
@@ -1149,10 +1266,20 @@ const App=()=>{
     }
   },[]);
 
+  const handleSelectSuggestion = useCallback(item => {
+    setCoords({ lat: item.latitude, lon: item.longitude });
+    setActiveLocation({
+      village: item.name,
+      district: item.admin1 || "",
+      state: item.country || "",
+      display: item.name
+    });
+  }, []);
+
   return(
     <div style={{minHeight:"100vh"}}>
       <div style={{minHeight:"100dvh",padding:"16px",paddingTop:`calc(var(--sat,0px) + 16px)`,display:"flex",flexDirection:"column",gap:"12px"}}>
-        <SearchBar location={activeLocation} onSearch={handleSearch} onSettings={()=>setSettOpen(true)} loading={weatherLoading}/>
+        <SearchBar location={activeLocation} onSearch={handleSearch} onSelectSuggestion={handleSelectSuggestion} onSettings={()=>setSettOpen(true)} loading={weatherLoading}/>
 
         {lowSig ? (
           <div style={{display:"flex",flexDirection:"column",gap:"12px"}}>
