@@ -985,6 +985,203 @@ const ExtMetrics=({cw})=>{
 };
 
 /* ═══════════════════════════════════════════════════════
+   POLLUTANT BREAKDOWN CARD  (desktop left sidebar)
+═══════════════════════════════════════════════════════ */
+const PollutantCard=({aqi})=>{
+  const pm25=aqi.pm2_5, pm10=aqi.pm10;
+  if(pm25==null&&pm10==null) return null;
+  const getColor=v=>v==null?"var(--text-dim)":v<=10?"#22c55e":v<=25?"#eab308":v<=50?"#f97316":"#ef4444";
+  const getBar=(v,max)=>Math.min((v/max)*100,100);
+  const pollutants=[
+    {label:"PM2.5",value:pm25,unit:"µg/m³",max:75,desc:"Fine particles"},
+    {label:"PM10", value:pm10,unit:"µg/m³",max:150,desc:"Coarse particles"},
+  ];
+  return(
+    <G level={2} style={{padding:"16px"}}>
+      <div style={{fontSize:"11px",color:"var(--text-sub)",textTransform:"uppercase",letterSpacing:"0.06em",marginBottom:"14px"}}>Pollutants</div>
+      <div style={{display:"flex",flexDirection:"column",gap:"14px"}}>
+        {pollutants.map(({label,value,unit,max,desc})=>{
+          const color=getColor(value);
+          const pct=value!=null?getBar(value,max):0;
+          return(
+            <div key={label}>
+              <div style={{display:"flex",justifyContent:"space-between",alignItems:"baseline",marginBottom:"6px"}}>
+                <div>
+                  <span style={{fontSize:"13px",fontWeight:700,color:"var(--text-main)"}}>{label}</span>
+                  <span style={{fontSize:"10px",color:"var(--text-dim)",marginLeft:"6px"}}>{desc}</span>
+                </div>
+                <span style={{fontFamily:"'Urbanist',sans-serif",fontSize:"16px",fontWeight:700,color}}>
+                  {value!=null?value:"—"}<span style={{fontSize:"10px",fontFamily:"'DM Sans',sans-serif",color:"var(--text-dim)",marginLeft:"3px"}}>{unit}</span>
+                </span>
+              </div>
+              <div style={{height:"5px",borderRadius:"3px",background:"var(--thin)",overflow:"hidden"}}>
+                <div style={{height:"100%",borderRadius:"3px",width:`${pct}%`,background:color,transition:"width 1s ease"}}/>
+              </div>
+            </div>
+          );
+        })}
+      </div>
+    </G>
+  );
+};
+
+/* ═══════════════════════════════════════════════════════
+   SMART WEATHER TIP  (desktop left sidebar)
+═══════════════════════════════════════════════════════ */
+const WeatherTip=({cw,imp})=>{
+  const temp=cw.temperature, uv=cw.uv_index, humidity=cw.humidity,
+        wind=cw.windspeed, precip=cw.precipitation, code=cw.conditionCode;
+  const tips=[];
+  if(precip>0)                       tips.push({e:"☂️",t:"Carry an umbrella — rain expected"});
+  else if(code==="storm")            tips.push({e:"⚡",t:"Storm conditions — stay indoors if possible"});
+  else if(uv!=="--"&&uv>=8)         tips.push({e:"🔆",t:"Very high UV — wear sunscreen & sunglasses"});
+  else if(uv!=="--"&&uv>=6)         tips.push({e:"🧴",t:"High UV today — apply sunscreen outdoors"});
+  if(humidity!=="--"&&humidity>80)   tips.push({e:"💧",t:"High humidity — stay hydrated"});
+  if(wind!=="--"&&wind>40)           tips.push({e:"🌬️",t:"Strong winds — secure loose objects"});
+  const rawT=Number(temp);
+  if(!isNaN(rawT)){
+    if(rawT<5)       tips.push({e:"🧥",t:"Near freezing — bundle up in layers"});
+    else if(rawT<15) tips.push({e:"🧣",t:"Cool day — a jacket is a good idea"});
+    else if(rawT>35) tips.push({e:"🥵",t:"Very hot — avoid midday sun, drink water"});
+    else if(rawT>28) tips.push({e:"😎",t:"Warm and sunny — great for outdoor plans"});
+    else             tips.push({e:"🌤️",t:"Pleasant conditions today"});
+  }
+  const tip=tips[0]||{e:"🌍",t:"Stay weather-aware"};
+  return(
+    <G level={1} style={{padding:"14px 16px",background:"linear-gradient(135deg,rgba(72,198,239,0.08),rgba(72,198,239,0.03))",border:"1px solid rgba(72,198,239,0.2)"}}>
+      <div style={{display:"flex",alignItems:"center",gap:"12px"}}>
+        <span style={{fontSize:"26px",lineHeight:1,flexShrink:0}}>{tip.e}</span>
+        <div>
+          <div style={{fontSize:"10px",color:"#48C6EF",fontWeight:700,textTransform:"uppercase",letterSpacing:"0.08em",marginBottom:"4px"}}>Today's Tip</div>
+          <div style={{fontSize:"13px",color:"var(--text-main)",lineHeight:1.45,fontWeight:500}}>{tip.t}</div>
+        </div>
+      </div>
+    </G>
+  );
+};
+
+/* ═══════════════════════════════════════════════════════
+   7-DAY TEMPERATURE TREND CHART  (desktop right sidebar)
+═══════════════════════════════════════════════════════ */
+const TempTrendChart=({daily,imp})=>{
+  if(!daily?.length) return null;
+  const W=280,H=110,PAD={t:20,b:28,l:8,r:8};
+  const iW=W-PAD.l-PAD.r, iH=H-PAD.t-PAD.b;
+  const toNum=v=>{ const n=typeof v==="number"?v:parseFloat(v); return isNaN(n)?null:n; };
+  const hiVals=daily.map(d=>toNum(d.hi)??0);
+  const loVals=daily.map(d=>toNum(d.lo)??0);
+  const allVals=[...hiVals,...loVals];
+  const minV=Math.min(...allVals)-2, maxV=Math.max(...allVals)+2;
+  const range=maxV-minV||1;
+  const n=daily.length;
+  const xOf=i=>PAD.l+(i/(n-1))*iW;
+  const yOf=v=>PAD.t+iH-(((imp?toNum(cvtT(v,imp))??v:v)-minV)/range)*iH;
+  const curve=arr=>{
+    return arr.map((v,i)=>{
+      const x=xOf(i), y=yOf(v);
+      if(i===0) return `M ${x.toFixed(1)} ${y.toFixed(1)}`;
+      const px=xOf(i-1), py=yOf(arr[i-1]), cx=(px+x)/2;
+      return `C ${cx.toFixed(1)} ${py.toFixed(1)} ${cx.toFixed(1)} ${y.toFixed(1)} ${x.toFixed(1)} ${y.toFixed(1)}`;
+    }).join(" ");
+  };
+  const hiPath=curve(hiVals);
+  const loPath=curve(loVals);
+  const areaPath=hiPath+
+    ` L ${xOf(n-1).toFixed(1)} ${yOf(loVals[n-1]).toFixed(1)}`+
+    loVals.slice().reverse().map((v,i)=>{
+      const ri=n-1-i, x=xOf(ri), y=yOf(v);
+      if(i===0) return ` L ${x.toFixed(1)} ${y.toFixed(1)}`;
+      const nx=xOf(ri+1), ny=yOf(loVals[ri+1]), cx=(nx+x)/2;
+      return ` C ${cx.toFixed(1)} ${ny.toFixed(1)} ${cx.toFixed(1)} ${y.toFixed(1)} ${x.toFixed(1)} ${y.toFixed(1)}`;
+    }).join("")+" Z";
+  return(
+    <div>
+      <SL t="7-Day Temp Trend"/>
+      <G level={2} style={{padding:"14px 16px"}}>
+        <svg viewBox={`0 0 ${W} ${H}`} style={{width:"100%",height:"auto",overflow:"visible"}}>
+          <defs>
+            <linearGradient id="trendGrad" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0%" stopColor="#48C6EF" stopOpacity="0.22"/>
+              <stop offset="100%" stopColor="#48C6EF" stopOpacity="0.01"/>
+            </linearGradient>
+          </defs>
+          {[0,0.5,1].map((f,i)=>(
+            <line key={i} x1={PAD.l} y1={PAD.t+iH*f} x2={W-PAD.r} y2={PAD.t+iH*f}
+              stroke="var(--border-light)" strokeWidth="0.5" strokeDasharray="3 3"/>
+          ))}
+          <path d={areaPath} fill="url(#trendGrad)"/>
+          <path d={loPath} fill="none" stroke="rgba(72,198,239,0.35)" strokeWidth="1.5" strokeLinecap="round"/>
+          <path d={hiPath} fill="none" stroke="#48C6EF" strokeWidth="2" strokeLinecap="round"/>
+          {daily.map((d,i)=>{
+            const x=xOf(i), hyVal=hiVals[i];
+            const displayHi=imp?cvtT(hyVal,imp):hyVal;
+            const displayLo=imp?cvtT(loVals[i],imp):loVals[i];
+            return(
+              <g key={i}>
+                <text x={x} y={H-4} textAnchor="middle" fill="var(--text-dim)" fontSize="7.5" fontFamily="DM Sans,sans-serif">
+                  {d.name.slice(0,3).toUpperCase()}
+                </text>
+                <circle cx={x} cy={yOf(hyVal)} r="2.5" fill="#48C6EF"/>
+                <text x={x} y={yOf(hyVal)-7} textAnchor="middle" fill="var(--text-main)" fontSize="8" fontFamily="Urbanist,sans-serif" fontWeight="700">
+                  {displayHi}°
+                </text>
+              </g>
+            );
+          })}
+        </svg>
+        <div style={{display:"flex",gap:"14px",justifyContent:"flex-end",marginTop:"6px"}}>
+          <div style={{display:"flex",alignItems:"center",gap:"5px"}}>
+            <div style={{width:"14px",height:"2px",borderRadius:"1px",background:"#48C6EF"}}/>
+            <span style={{fontSize:"10px",color:"var(--text-dim)"}}>High</span>
+          </div>
+          <div style={{display:"flex",alignItems:"center",gap:"5px"}}>
+            <div style={{width:"14px",height:"2px",borderRadius:"1px",background:"rgba(72,198,239,0.35)"}}/>
+            <span style={{fontSize:"10px",color:"var(--text-dim)"}}>Low</span>
+          </div>
+        </div>
+      </G>
+    </div>
+  );
+};
+
+/* ═══════════════════════════════════════════════════════
+   7-DAY PRECIPITATION BARS  (desktop right sidebar)
+═══════════════════════════════════════════════════════ */
+const PrecipBars=({daily})=>{
+  if(!daily?.length) return null;
+  const vals=daily.map(d=>{ const n=parseFloat(d.precipitation); return isNaN(n)?0:n; });
+  const maxVal=Math.max(...vals,1);
+  const getColor=v=>v<=0?"var(--border-light)":v<2?"#7dd3fc":v<5?"#38bdf8":v<15?"#0284c7":"#1e40af";
+  const total=vals.reduce((a,b)=>a+b,0).toFixed(1);
+  return(
+    <div>
+      <SL t="Precipitation Forecast"/>
+      <G level={2} style={{padding:"14px 16px"}}>
+        <div style={{display:"flex",alignItems:"flex-end",gap:"5px",height:"72px"}}>
+          {daily.map((d,i)=>{
+            const v=vals[i];
+            const pct=Math.max((v/maxVal)*100,v>0?8:2);
+            return(
+              <div key={i} style={{flex:1,display:"flex",flexDirection:"column",alignItems:"center",gap:"3px",height:"100%",justifyContent:"flex-end"}}>
+                {v>0&&<span style={{fontSize:"7.5px",color:"var(--text-dim)"}}>{v}mm</span>}
+                <div style={{width:"100%",borderRadius:"3px 3px 0 0",background:getColor(v),height:`${pct}%`,transition:"height .8s ease",minHeight:"3px"}}/>
+                <span style={{fontSize:"7.5px",color:"var(--text-dim)",whiteSpace:"nowrap"}}>{d.name.slice(0,3)}</span>
+              </div>
+            );
+          })}
+        </div>
+        <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginTop:"10px",paddingTop:"10px",borderTop:"1px solid var(--border-light)"}}>
+          <span style={{fontSize:"10px",color:"var(--text-dim)"}}>7-day total</span>
+          <span style={{fontFamily:"'Urbanist',sans-serif",fontSize:"14px",fontWeight:700,color:"var(--text-main)"}}>
+            {total}<span style={{fontSize:"10px",color:"var(--text-dim)",marginLeft:"3px"}}>mm</span>
+          </span>
+        </div>
+      </G>
+    </div>
+  );
+};
+
+/* ═══════════════════════════════════════════════════════
    HOURLY SCROLL
 ═══════════════════════════════════════════════════════ */
 const HourlyScroll=({hourly,imp})=>{
