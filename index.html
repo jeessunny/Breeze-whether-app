@@ -1479,15 +1479,15 @@ const App=()=>{
             </div>
           ) : (
             <>
-              {/* ── LEFT sidebar (desktop): big hero card only ── */}
+              {/* ── LEFT sidebar (desktop): hero + AQI + Sun ── */}
               <div className="col-left">
                 <HeroCard cw={cw} location={activeLocation} imp={imp}/>
-                {/* On mobile these show inside col-left; on desktop they move to col-right via CSS order */}
+                <div style={{display:"flex",gap:"12px"}}>
+                  <AQICard aqi={aqi}/>
+                  <SunCard sun_moon={sun_moon}/>
+                </div>
+                {/* mobile-only: stats + metrics also show here */}
                 <div className="desktop-hidden">
-                  <div style={{display:"flex",gap:"12px",marginTop:"14px"}}>
-                    <AQICard aqi={aqi}/>
-                    <SunCard sun_moon={sun_moon}/>
-                  </div>
                   <div style={{marginTop:"14px"}}><StatGrid cw={cw} imp={imp}/></div>
                   <div style={{marginTop:"14px"}}><ExtMetrics cw={cw}/></div>
                 </div>
@@ -1500,13 +1500,9 @@ const App=()=>{
                 <DailyAccordion daily={liveDaily} imp={imp}/>
               </div>
 
-              {/* ── RIGHT sidebar (desktop only): stats + AQI + Sun + metrics ── */}
+              {/* ── RIGHT sidebar (desktop only): stats + extended metrics ── */}
               <div className="col-right">
                 <StatGrid cw={cw} imp={imp}/>
-                <div style={{display:"flex",gap:"12px"}}>
-                  <AQICard aqi={aqi}/>
-                  <SunCard sun_moon={sun_moon}/>
-                </div>
                 <ExtMetrics cw={cw}/>
               </div>
             </>
