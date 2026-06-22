@@ -1268,7 +1268,15 @@ const App=()=>{
         setGeoState("denied");
         setWeatherLoading(false);
         if (isManual) {
-          setSearchError("Location access denied or unavailable.");
+          if (err.code === 1) {
+            setSearchError("Location access blocked. Tap the lock/info icon in the address bar to allow location. (Note: Geolocation requires HTTPS)");
+          } else if (err.code === 2) {
+            setSearchError("Location unavailable. Please check your device's GPS or connection.");
+          } else if (err.code === 3) {
+            setSearchError("Location request timed out. Please try again.");
+          } else {
+            setSearchError("Location access denied or unavailable.");
+          }
         }
       },
       { timeout: 15000, maximumAge: 60000 }
