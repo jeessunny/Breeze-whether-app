@@ -324,6 +324,32 @@ const geocodeWithOSM = async (query) => {
   throw new Error(`"${q}" not found. Try a nearby city.`);
 };
 
+const reverseGeocodeOSM = async (lat, lon) => {
+  try {
+    const url = `https://nominatim.openstreetmap.org/reverse?lat=${lat}&lon=${lon}&format=json&accept-language=en`;
+    const res = await _fetchWithTimeout(url, {
+      headers: {
+        "Accept-Language": "en",
+        "User-Agent": "BreezeWeatherApp/12"
+      }
+    }, 5000);
+    if (res.ok) {
+      const d = await res.json();
+      const addr = d.address || {};
+      const name = addr.city || addr.town || addr.village || addr.municipality || addr.suburb || addr.county || d.display_name.split(",")[0].trim();
+      return {
+        village: name,
+        district: addr.state_district || addr.county || addr.state || "",
+        state: addr.country || "",
+        display: name
+      };
+    }
+  } catch (e) {
+    console.error("Reverse geocoding failed:", e);
+  }
+  return null;
+};
+
 /* ═══════════════════════════════════════════════════════
    WMO CODE MAPPER
 ═══════════════════════════════════════════════════════ */
@@ -1063,7 +1089,16 @@ const App=()=>{
     if(!onboarded) return;
     if(navigator.geolocation){
       navigator.geolocation.getCurrentPosition(
-        pos=>{setCoords({lat:pos.coords.latitude,lon:pos.coords.longitude});setGeoState("got");},
+        async pos=>{
+          const lat = pos.coords.latitude;
+          const lon = pos.coords.longitude;
+          setCoords({lat, lon});
+          setGeoState("got");
+          try {
+            const loc = await reverseGeocodeOSM(lat, lon);
+            if (loc) setActiveLocation(loc);
+          } catch (e) {}
+        },
         ()=>setGeoState("denied"),{timeout:8000}
       );
     }
@@ -1076,7 +1111,18 @@ const App=()=>{
       if(data){
         setLiveWeather(data.currentWeather);setLiveHourly(data.hourly);
         setLiveDaily(data.daily);setLiveAqi(data.aqi);setLiveSunMoon(data.sun_moon);
-        if(!activeLocation) setActiveLocation({...data.locationFromApi,display:data.locationFromApi.village});
+        if(!activeLocation) {
+          try {
+            const loc = await reverseGeocodeOSM(coords.lat, coords.lon);
+            if (loc) {
+              setActiveLocation(loc);
+            } else {
+              setActiveLocation({...data.locationFromApi,display:data.locationFromApi.village});
+            }
+          } catch(e) {
+            setActiveLocation({...data.locationFromApi,display:data.locationFromApi.village});
+          }
+        }
       } else {
         setWeatherError("Could not load weather data.");
       }
