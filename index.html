@@ -312,6 +312,15 @@
       /* hide the mobile-fallback duplicate cards that live inside col-left */
       .desktop-hidden{ display:none; }
     }
+
+    /* ── Mobile vs Desktop layout trees ───────────── */
+    /* Mobile layout: visible below 1024px, hidden above */
+    .mobile-layout  { display:block; }
+    .desktop-layout { display:none;  }
+    @media(min-width:1024px){
+      .mobile-layout  { display:none;  }
+      .desktop-layout { display:block; }
+    }
   </style>
 </head>
 <body>
@@ -1645,29 +1654,26 @@ const App=()=>{
 
   return(
     <div style={{minHeight:"100vh"}}>
-      <div className="page-shell">
-        <div className="page-inner">
 
-          {/* ── sticky search bar, always spans full width ── */}
-          <div className="col-search">
-            <SearchBar location={activeLocation} onSearch={handleSearch} onSelectSuggestion={handleSelectSuggestion} onSettings={()=>setSettOpen(true)} onLocate={()=>fetchGeoLocation(true)} loading={weatherLoading}/>
-            {searchError && (
-              <div style={{
-                display:"flex",alignItems:"center",justifyContent:"space-between",
-                padding:"10px 14px",borderRadius:"14px",marginTop:"8px",
-                background:"rgba(239,68,68,0.15)",border:"1px solid rgba(239,68,68,0.3)",
-                color:"#fca5a5",fontSize:"13px"
-              }}>
-                <span>{searchError}</span>
-                <button onClick={()=>setSearchError(null)} style={{background:"none",border:"none",cursor:"pointer",display:"flex",alignItems:"center",padding:0}}>
-                  <I.X s={14} c="#fca5a5"/>
-                </button>
-              </div>
-            )}
-          </div>
+      {/* ════════════════════════════════════════════
+          MOBILE LAYOUT  (hidden on desktop ≥1024px)
+          Exact original single-column flow
+      ════════════════════════════════════════════ */}
+      <div className="mobile-layout">
+        <div style={{minHeight:"100dvh",padding:"16px",paddingTop:"calc(var(--sat,0px) + 16px)",display:"flex",flexDirection:"column",gap:"12px",position:"relative",zIndex:1}}>
+          <SearchBar location={activeLocation} onSearch={handleSearch} onSelectSuggestion={handleSelectSuggestion} onSettings={()=>setSettOpen(true)} onLocate={()=>fetchGeoLocation(true)} loading={weatherLoading}/>
 
-          {lowSig ? (
-            <div className="col-full" style={{display:"flex",flexDirection:"column",gap:"12px",padding:"16px"}}>
+          {searchError&&(
+            <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",padding:"10px 14px",borderRadius:"14px",background:"rgba(239,68,68,0.15)",border:"1px solid rgba(239,68,68,0.3)",color:"#fca5a5",fontSize:"13px",marginTop:"2px"}}>
+              <span>{searchError}</span>
+              <button onClick={()=>setSearchError(null)} style={{background:"none",border:"none",cursor:"pointer",display:"flex",alignItems:"center",padding:0}}>
+                <I.X s={14} c="#fca5a5"/>
+              </button>
+            </div>
+          )}
+
+          {lowSig?(
+            <div style={{display:"flex",flexDirection:"column",gap:"12px"}}>
               <HeroCard cw={cw} location={activeLocation} imp={imp}/>
               <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",padding:"10px 14px",borderRadius:"14px",background:"var(--thin)",border:"1px solid var(--border-light)"}}>
                 <div style={{display:"flex",alignItems:"center",gap:"8px"}}>
@@ -1679,9 +1685,59 @@ const App=()=>{
                 </button>
               </div>
             </div>
-          ) : (
+          ):(
             <>
-              {/* ── LEFT sidebar: hero + AQI + Sun + pollutants + tip ── */}
+              <MapHero isDark={isDark} coords={coords} activeLocation={activeLocation} lowSig={lowSig} onDisableLowSig={()=>setLowSig(false)}/>
+              <HeroCard cw={cw} location={activeLocation} imp={imp}/>
+              <StatGrid cw={cw} imp={imp}/>
+              <ExtMetrics cw={cw}/>
+              <HourlyScroll hourly={liveHourly} imp={imp}/>
+              <div style={{display:"flex",gap:"12px"}}>
+                <AQICard aqi={aqi}/>
+                <SunCard sun_moon={sun_moon}/>
+              </div>
+              <DailyAccordion daily={liveDaily} imp={imp}/>
+            </>
+          )}
+        </div>
+      </div>
+
+      {/* ════════════════════════════════════════════
+          DESKTOP LAYOUT  (hidden on mobile <1024px)
+          3-column sticky dashboard
+      ════════════════════════════════════════════ */}
+      <div className="desktop-layout">
+        <div className="page-inner">
+
+          {/* sticky search bar */}
+          <div className="col-search">
+            <SearchBar location={activeLocation} onSearch={handleSearch} onSelectSuggestion={handleSelectSuggestion} onSettings={()=>setSettOpen(true)} onLocate={()=>fetchGeoLocation(true)} loading={weatherLoading}/>
+            {searchError&&(
+              <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",padding:"10px 14px",borderRadius:"14px",marginTop:"8px",background:"rgba(239,68,68,0.15)",border:"1px solid rgba(239,68,68,0.3)",color:"#fca5a5",fontSize:"13px"}}>
+                <span>{searchError}</span>
+                <button onClick={()=>setSearchError(null)} style={{background:"none",border:"none",cursor:"pointer",display:"flex",alignItems:"center",padding:0}}>
+                  <I.X s={14} c="#fca5a5"/>
+                </button>
+              </div>
+            )}
+          </div>
+
+          {lowSig?(
+            <div style={{gridColumn:"1/-1",display:"flex",flexDirection:"column",gap:"12px",padding:"16px"}}>
+              <HeroCard cw={cw} location={activeLocation} imp={imp}/>
+              <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",padding:"10px 14px",borderRadius:"14px",background:"var(--thin)",border:"1px solid var(--border-light)"}}>
+                <div style={{display:"flex",alignItems:"center",gap:"8px"}}>
+                  <I.Wifi0 s={13} c="var(--text-dim)"/>
+                  <span style={{fontSize:"12px",color:"var(--text-dim)",fontWeight:500}}>Low Signal Home</span>
+                </div>
+                <button onClick={()=>setLowSig(false)} style={{width:"28px",height:"28px",borderRadius:"50%",background:"var(--thin)",border:"1px solid var(--border-light)",display:"flex",alignItems:"center",justifyContent:"center",cursor:"pointer"}}>
+                  <I.X s={13} c="var(--text-main)"/>
+                </button>
+              </div>
+            </div>
+          ):(
+            <>
+              {/* LEFT sidebar */}
               <div className="col-left">
                 <HeroCard cw={cw} location={activeLocation} imp={imp}/>
                 <div style={{display:"flex",gap:"12px"}}>
@@ -1690,21 +1746,16 @@ const App=()=>{
                 </div>
                 <PollutantCard aqi={aqi}/>
                 <WeatherTip cw={cw} imp={imp}/>
-                {/* mobile-only: stats + metrics also show here */}
-                <div className="desktop-hidden">
-                  <div style={{marginTop:"14px"}}><StatGrid cw={cw} imp={imp}/></div>
-                  <div style={{marginTop:"14px"}}><ExtMetrics cw={cw}/></div>
-                </div>
               </div>
 
-              {/* ── CENTRE: map + hourly + 7-day ── */}
+              {/* CENTRE */}
               <div className="col-centre">
                 <MapHero isDark={isDark} coords={coords} activeLocation={activeLocation} lowSig={lowSig} onDisableLowSig={()=>setLowSig(false)}/>
                 <HourlyScroll hourly={liveHourly} imp={imp}/>
                 <DailyAccordion daily={liveDaily} imp={imp}/>
               </div>
 
-              {/* ── RIGHT sidebar: stats + ext metrics + temp trend + precip bars ── */}
+              {/* RIGHT sidebar */}
               <div className="col-right">
                 <StatGrid cw={cw} imp={imp}/>
                 <ExtMetrics cw={cw}/>
