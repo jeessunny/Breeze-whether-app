@@ -1167,6 +1167,7 @@ const App=()=>{
   const [weatherLoading,setWeatherLoading]=useState(true);
   const [weatherError,setWeatherError]=useState(null);
   const [searchError,setSearchError]=useState(null);
+  const didSearchRef = useRef(false);
 
   useEffect(()=>{ localStorage.setItem("bz_imp",imp); },[imp]);
   useEffect(()=>{ localStorage.setItem("bz_theme",themePref); },[themePref]);
@@ -1208,6 +1209,10 @@ const App=()=>{
 
     navigator.geolocation.getCurrentPosition(
       async pos => {
+        if (didSearchRef.current) {
+          setGeoState("got");
+          return;
+        }
         const lat = pos.coords.latitude;
         const lon = pos.coords.longitude;
         setGeoState("got");
@@ -1227,7 +1232,7 @@ const App=()=>{
         setWeatherLoading(false);
         if (isManual) {
           if (err.code === 1) {
-            setSearchError("Location access blocked. Tap the lock/info icon in the address bar to allow location. (Note: Geolocation requires HTTPS)");
+            setSearchError("Location access blocked. Tap the lock/settings icon in the address bar, enable Location permission, and refresh the page.");
           } else if (err.code === 2) {
             setSearchError("Location unavailable. Please check your device's GPS or connection.");
           } else if (err.code === 3) {
@@ -1237,7 +1242,7 @@ const App=()=>{
           }
         }
       },
-      { timeout: 15000, maximumAge: 60000 }
+      { enableHighAccuracy: false, timeout: 5000, maximumAge: 300000 }
     );
   }, []);
 
@@ -1246,6 +1251,7 @@ const App=()=>{
   }, [fetchGeoLocation]);
 
   useEffect(()=>{
+    if (geoState === "pending") return;
     const load=async()=>{
       setWeatherLoading(true);
       const data=await fetchWeather(coords.lat,coords.lon);
@@ -1283,7 +1289,7 @@ const App=()=>{
       setWeatherLoading(false);
     };
     load();
-  },[coords.lat,coords.lon]);
+  },[coords.lat,coords.lon,geoState]);
 
   const isDark=resolveTheme(themePref,sysDark)==="dark";
   const cw=liveWeather||{temperature:"--",feelslike:"--",humidity:"--",windspeed:"--",uv_index:"--",visibility:"--",precipitation:"--",pressure:"--",dewPoint:"--",icon:"🌡️",condition:"Loading…"};
@@ -1294,6 +1300,8 @@ const App=()=>{
     if(!q?.trim()) return;
     setWeatherLoading(true);
     setSearchError(null);
+    didSearchRef.current = true;
+    setGeoState("got");
     try{
       const geo=await geocodeWithOSM(q);
       setCoords({lat:geo.lat,lon:geo.lon});
@@ -1306,6 +1314,8 @@ const App=()=>{
 
   const handleSelectSuggestion = useCallback(item => {
     setSearchError(null);
+    didSearchRef.current = true;
+    setGeoState("got");
     setCoords({ lat: item.latitude, lon: item.longitude });
     setActiveLocation({
       village: item.name,
