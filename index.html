@@ -562,7 +562,12 @@ const fetchWeather = async (lat, lon) => {
     });
 
     const aq=aqData?.current||{};
-    const aqi={value:aq.european_aqi!=null?Math.round(aq.european_aqi):null,pollutant:(aq.pm2_5!=null&&aq.pm10!=null)?(aq.pm2_5>=aq.pm10?"PM2.5":"PM10"):"AQI"};
+    const aqi={
+      value:aq.european_aqi!=null?Math.round(aq.european_aqi):null,
+      pollutant:(aq.pm2_5!=null&&aq.pm10!=null)?(aq.pm2_5>=aq.pm10?"PM2.5":"PM10"):"AQI",
+      pm2_5:aq.pm2_5!=null?Math.round(aq.pm2_5*10)/10:null,
+      pm10:aq.pm10!=null?Math.round(aq.pm10*10)/10:null,
+    };
     const d0=daily[0]||{};
     const sun_moon={sunrise:d0.sunrise||"06:00",sunset:d0.sunset||"18:00",daylight_hours:d0.daylight_hours||12,moon_emoji:"🌙"};
     const tzParts=(wData.timezone||"Asia/Kolkata").split("/");
@@ -1479,13 +1484,15 @@ const App=()=>{
             </div>
           ) : (
             <>
-              {/* ── LEFT sidebar (desktop): hero + AQI + Sun ── */}
+              {/* ── LEFT sidebar: hero + AQI + Sun + pollutants + tip ── */}
               <div className="col-left">
                 <HeroCard cw={cw} location={activeLocation} imp={imp}/>
                 <div style={{display:"flex",gap:"12px"}}>
                   <AQICard aqi={aqi}/>
                   <SunCard sun_moon={sun_moon}/>
                 </div>
+                <PollutantCard aqi={aqi}/>
+                <WeatherTip cw={cw} imp={imp}/>
                 {/* mobile-only: stats + metrics also show here */}
                 <div className="desktop-hidden">
                   <div style={{marginTop:"14px"}}><StatGrid cw={cw} imp={imp}/></div>
@@ -1493,17 +1500,19 @@ const App=()=>{
                 </div>
               </div>
 
-              {/* ── CENTRE (desktop): map + hourly + 7-day ── */}
+              {/* ── CENTRE: map + hourly + 7-day ── */}
               <div className="col-centre">
                 <MapHero isDark={isDark} coords={coords} activeLocation={activeLocation} lowSig={lowSig} onDisableLowSig={()=>setLowSig(false)}/>
                 <HourlyScroll hourly={liveHourly} imp={imp}/>
                 <DailyAccordion daily={liveDaily} imp={imp}/>
               </div>
 
-              {/* ── RIGHT sidebar (desktop only): stats + extended metrics ── */}
+              {/* ── RIGHT sidebar: stats + ext metrics + temp trend + precip bars ── */}
               <div className="col-right">
                 <StatGrid cw={cw} imp={imp}/>
                 <ExtMetrics cw={cw}/>
+                <TempTrendChart daily={liveDaily} imp={imp}/>
+                <PrecipBars daily={liveDaily} imp={imp}/>
               </div>
             </>
           )}
