@@ -200,6 +200,63 @@
       flex:1;height:1px;
       background:linear-gradient(90deg,var(--border-light) 0%,transparent 100%);
     }
+
+    /* ── Responsive Layout ───────────────────────────────── */
+    .page-shell{
+      min-height:100dvh;
+      width:100%;
+      display:flex;
+      flex-direction:column;
+      align-items:center;
+      padding:16px;
+      padding-top:calc(var(--sat,0px) + 16px);
+      padding-bottom:calc(var(--sab,0px) + 16px);
+      box-sizing:border-box;
+      position:relative;
+      z-index:1;
+    }
+    .page-inner{
+      width:100%;
+      max-width:520px;
+      display:flex;
+      flex-direction:column;
+      gap:12px;
+    }
+    /* tablet – comfortable centre column */
+    @media(min-width:640px){
+      .page-shell{padding:20px;padding-top:calc(var(--sat,0px) + 20px);}
+      .page-inner{max-width:640px;}
+      .map-wrap{height:280px;}
+    }
+    /* desktop – two-column side-by-side */
+    @media(min-width:1024px){
+      .page-shell{
+        padding:28px 32px;
+        padding-top:calc(var(--sat,0px) + 28px);
+        align-items:flex-start;
+        justify-content:center;
+      }
+      .page-inner{
+        max-width:1200px;
+        width:100%;
+        display:grid;
+        grid-template-columns:1fr 1fr;
+        grid-template-rows:auto;
+        gap:16px;
+        align-items:start;
+      }
+      .col-search { grid-column:1/-1; }
+      .col-error  { grid-column:1/-1; }
+      .col-left   { display:flex; flex-direction:column; gap:14px; }
+      .col-right  { display:flex; flex-direction:column; gap:14px; }
+      .col-full   { grid-column:1/-1; }
+      .map-wrap{height:320px;}
+    }
+    /* large desktop */
+    @media(min-width:1440px){
+      .page-inner{max-width:1400px;}
+      .map-wrap{height:360px;}
+    }
   </style>
 </head>
 <body>
@@ -1331,61 +1388,66 @@ const App=()=>{
 
   return(
     <div style={{minHeight:"100vh"}}>
-      <div style={{minHeight:"100dvh",padding:"16px",paddingTop:`calc(var(--sat,0px) + 16px)`,display:"flex",flexDirection:"column",gap:"12px",position:"relative",zIndex:1}}>
-        <SearchBar location={activeLocation} onSearch={handleSearch} onSelectSuggestion={handleSelectSuggestion} onSettings={()=>setSettOpen(true)} onLocate={() => fetchGeoLocation(true)} loading={weatherLoading}/>
+      <div className="page-shell">
+        <div className="page-inner">
 
-        {searchError && (
-          <div style={{
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "space-between",
-            padding: "10px 14px",
-            borderRadius: "14px",
-            background: "rgba(239, 68, 68, 0.15)",
-            border: "1px solid rgba(239, 68, 68, 0.3)",
-            color: "#fca5a5",
-            fontSize: "13px",
-            marginTop: "2px"
-          }}>
-            <span>{searchError}</span>
-            <button onClick={() => setSearchError(null)} style={{background:"none", border:"none", cursor:"pointer", display:"flex", alignItems:"center", padding:0}}>
-              <I.X s={14} c="#fca5a5"/>
-            </button>
-          </div>
-        )}
-
-        {lowSig ? (
-          <div style={{display:"flex",flexDirection:"column",gap:"12px"}}>
-            <HeroCard cw={cw} location={activeLocation} imp={imp}/>
-            <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",padding:"10px 14px",borderRadius:"14px",background:"var(--thin)",border:"1px solid var(--border-light)"}}>
-              <div style={{display:"flex",alignItems:"center",gap:"8px"}}>
-                <I.Wifi0 s={13} c="var(--text-dim)"/>
-                <span style={{fontSize:"12px",color:"var(--text-dim)",fontWeight:500}}>Low Signal Home</span>
+          {/* ── Search bar – always full-width ── */}
+          <div className="col-search">
+            <SearchBar location={activeLocation} onSearch={handleSearch} onSelectSuggestion={handleSelectSuggestion} onSettings={()=>setSettOpen(true)} onLocate={()=>fetchGeoLocation(true)} loading={weatherLoading}/>
+            {searchError && (
+              <div style={{
+                display:"flex",alignItems:"center",justifyContent:"space-between",
+                padding:"10px 14px",borderRadius:"14px",marginTop:"8px",
+                background:"rgba(239,68,68,0.15)",border:"1px solid rgba(239,68,68,0.3)",
+                color:"#fca5a5",fontSize:"13px"
+              }}>
+                <span>{searchError}</span>
+                <button onClick={()=>setSearchError(null)} style={{background:"none",border:"none",cursor:"pointer",display:"flex",alignItems:"center",padding:0}}>
+                  <I.X s={14} c="#fca5a5"/>
+                </button>
               </div>
-              <button onClick={()=>setLowSig(false)} style={{width:"28px",height:"28px",borderRadius:"50%",background:"var(--thin)",border:"1px solid var(--border-light)",display:"flex",alignItems:"center",justifyContent:"center",cursor:"pointer"}}>
-                <I.X s={13} c="var(--text-main)"/>
-              </button>
-            </div>
+            )}
           </div>
-        ) : (
-          <>
-            <MapHero isDark={isDark} coords={coords} activeLocation={activeLocation} lowSig={lowSig} onDisableLowSig={()=>setLowSig(false)}/>
-            <HeroCard cw={cw} location={activeLocation} imp={imp}/>
-            <StatGrid cw={cw} imp={imp}/>
-            <ExtMetrics cw={cw}/>
-            <HourlyScroll hourly={liveHourly} imp={imp}/>
-            <div style={{display:"flex",gap:"12px"}}>
-              <AQICard aqi={aqi}/>
-              <SunCard sun_moon={sun_moon}/>
+
+          {lowSig ? (
+            <div className="col-full" style={{display:"flex",flexDirection:"column",gap:"12px"}}>
+              <HeroCard cw={cw} location={activeLocation} imp={imp}/>
+              <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",padding:"10px 14px",borderRadius:"14px",background:"var(--thin)",border:"1px solid var(--border-light)"}}>
+                <div style={{display:"flex",alignItems:"center",gap:"8px"}}>
+                  <I.Wifi0 s={13} c="var(--text-dim)"/>
+                  <span style={{fontSize:"12px",color:"var(--text-dim)",fontWeight:500}}>Low Signal Home</span>
+                </div>
+                <button onClick={()=>setLowSig(false)} style={{width:"28px",height:"28px",borderRadius:"50%",background:"var(--thin)",border:"1px solid var(--border-light)",display:"flex",alignItems:"center",justifyContent:"center",cursor:"pointer"}}>
+                  <I.X s={13} c="var(--text-main)"/>
+                </button>
+              </div>
             </div>
-            <DailyAccordion daily={liveDaily} imp={imp}/>
-          </>
-        )}
+          ) : (
+            <>
+              {/* ── LEFT column ── */}
+              <div className="col-left">
+                <MapHero isDark={isDark} coords={coords} activeLocation={activeLocation} lowSig={lowSig} onDisableLowSig={()=>setLowSig(false)}/>
+                <HeroCard cw={cw} location={activeLocation} imp={imp}/>
+                <StatGrid cw={cw} imp={imp}/>
+                <div style={{display:"flex",gap:"12px"}}>
+                  <AQICard aqi={aqi}/>
+                  <SunCard sun_moon={sun_moon}/>
+                </div>
+              </div>
+
+              {/* ── RIGHT column ── */}
+              <div className="col-right">
+                <ExtMetrics cw={cw}/>
+                <HourlyScroll hourly={liveHourly} imp={imp}/>
+                <DailyAccordion daily={liveDaily} imp={imp}/>
+              </div>
+            </>
+          )}
+
+        </div>
       </div>
 
       <SettingsPanel open={settOpen} onClose={()=>setSettOpen(false)} imp={imp} setImp={setImp} lowSig={lowSig} setLowSig={setLowSig} themePref={themePref} setThemePref={setThemePref} geoState={geoState}/>
-
-
     </div>
   );
 };
