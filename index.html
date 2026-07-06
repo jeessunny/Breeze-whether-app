@@ -14,6 +14,12 @@
   <meta name="mobile-web-app-capable" content="yes"/>
   <meta name="apple-mobile-web-app-capable" content="yes"/>
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"/>
+  <meta name="theme-color" content="#0a0f1e"/>
+  <meta name="description" content="Premium hyper-local weather dashboard with glassmorphism UI, real-time forecasts, AQI tracking, and 3D maps."/>
+  <link rel="manifest" href="/manifest.json"/>
+  <link rel="apple-touch-icon" href="/icons/apple-touch-icon.png"/>
+  <link rel="icon" type="image/png" sizes="192x192" href="/icons/icon-192x192.png"/>
+  <link rel="icon" type="image/png" sizes="512x512" href="/icons/icon-512x512.png"/>
   <title>Breeze</title>
 
   <link rel="preconnect" href="https://fonts.googleapis.com"/>
@@ -656,6 +662,15 @@ const SL=({t})=>(
 ═══════════════════════════════════════════════════════ */
 const MapHero=({isDark,coords,activeLocation,lowSig,onDisableLowSig})=>{
   const mapRef=useRef(null), instRef=useRef(null), markerRef=useRef(null);
+  const [isOffline,setIsOffline]=useState(!navigator.onLine);
+
+  useEffect(()=>{
+    const goOff=()=>setIsOffline(true);
+    const goOn=()=>setIsOffline(false);
+    window.addEventListener('online',goOn);
+    window.addEventListener('offline',goOff);
+    return()=>{window.removeEventListener('online',goOn);window.removeEventListener('offline',goOff);};
+  },[]);
 
   useEffect(()=>{
     if(lowSig) return;
@@ -747,6 +762,18 @@ const MapHero=({isDark,coords,activeLocation,lowSig,onDisableLowSig})=>{
   return(
     <div className="map-wrap">
       <div ref={mapRef} className="map-canvas" style={{filter:isDark?"brightness(0.95)":"brightness(0.95)"}}/>
+      {isOffline&&(
+        <div style={{
+          position:"absolute",inset:0,borderRadius:"inherit",zIndex:5,
+          display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"center",
+          background:"rgba(10,15,30,0.82)",backdropFilter:"blur(6px)",WebkitBackdropFilter:"blur(6px)",
+          gap:"8px",pointerEvents:"none",
+        }}>
+          <I.Wifi0 s={28} c="rgba(255,255,255,0.5)"/>
+          <span style={{fontSize:"13px",fontWeight:600,color:"rgba(255,255,255,0.8)"}}>You are offline</span>
+          <span style={{fontSize:"11px",color:"rgba(255,255,255,0.45)",textAlign:"center",maxWidth:"180px",lineHeight:"1.5"}}>Turn on the internet to load the map</span>
+        </div>
+      )}
     </div>
   );
 };
@@ -1780,6 +1807,17 @@ const _mount=()=>{
 };
 if(document.readyState==="loading") document.addEventListener("DOMContentLoaded",_mount);
 else _mount();
+</script>
+
+<script>
+  // Register Service Worker for PWA
+  if ('serviceWorker' in navigator) {
+    window.addEventListener('load', () => {
+      navigator.serviceWorker.register('/sw.js')
+        .then(reg => console.log('[SW] Registered:', reg.scope))
+        .catch(err => console.warn('[SW] Registration failed:', err));
+    });
+  }
 </script>
 </body>
 </html>
