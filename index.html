@@ -1446,11 +1446,23 @@ const SettingsPanel=({open,onClose,imp,setImp,lowSig,setLowSig,themePref,setThem
             
           <Cat c="Location"/>
           <Row Icon={I.Pin} title="Location Access"
-            sub={locationEnabled?(geoState==="got"?"Location active":"Requesting location…"):"Disabled — using last known location"}
+            sub={locationEnabled ? (
+              geoState === "got" ? "Location active" :
+              geoState === "denied" ? "Permission denied in settings" :
+              geoState === "unsupported" ? "Not supported by device" :
+              "Requesting location…"
+            ) : "Disabled — using last known location"}
             right={<Toggle on={locationEnabled} onChange={onToggleLocation}/>} />
           {!locationEnabled&&(
-            <div style={{padding:"10px 14px",borderRadius:"12px",background:"rgba(239,68,68,0.1)",border:"1px solid rgba(239,68,68,0.2)",marginBottom:"6px"}}>
+            <div style={{padding:"10px 14px",borderRadius:"12px",background:"rgba(239,68,68,0.1)",border:"1px solid rgba(239,68,68,0.2)",marginTop:"12px",marginBottom:"6px"}}>
               <span style={{fontSize:"11.5px",color:"#fca5a5",lineHeight:"1.5"}}>Location is turned off. Enable the toggle above to get weather for your current location.</span>
+            </div>
+          )}
+          {locationEnabled && geoState === "denied" && (
+            <div style={{padding:"10px 14px",borderRadius:"12px",background:"rgba(239,68,68,0.1)",border:"1px solid rgba(239,68,68,0.2)",marginTop:"12px",marginBottom:"6px"}}>
+              <span style={{fontSize:"11.5px",color:"#fca5a5",lineHeight:"1.5"}}>
+                <strong>Location access denied.</strong> Open your browser/device settings and allow Location permission, or reset permissions to enable this switch.
+              </span>
             </div>
           )}
             
@@ -1572,6 +1584,7 @@ const App=()=>{
 
     setWeatherLoading(true);
     setSearchError(null);
+    setGeoState("pending");
 
     navigator.geolocation.getCurrentPosition(
       async pos => {

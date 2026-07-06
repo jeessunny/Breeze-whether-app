@@ -1,7 +1,7 @@
 // Breeze Weather — Service Worker
 // Network-first for API calls, cache-first for static assets
 
-const CACHE_NAME = 'breeze-v2';
+const CACHE_NAME = 'breeze-v3';
 const STATIC_ASSETS = [
   '/',
   '/index.html',
