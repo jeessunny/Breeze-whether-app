@@ -1,7 +1,7 @@
 // Breeze Weather — Service Worker
 // Network-first for API calls, cache-first for static assets
 
-const CACHE_NAME = 'breeze-v1';
+const CACHE_NAME = 'breeze-v2';
 const STATIC_ASSETS = [
   '/',
   '/index.html',
@@ -38,7 +38,7 @@ self.addEventListener('activate', (event) => {
   self.clients.claim();
 });
 
-// Fetch — network-first for API/dynamic, cache-first for static
+// Fetch — network-first for API/dynamic/navigation, cache-first for static
 self.addEventListener('fetch', (event) => {
   const url = new URL(event.request.url);
 
@@ -47,6 +47,23 @@ self.addEventListener('fetch', (event) => {
 
   // Skip chrome-extension, blob, data URLs
   if (!url.protocol.startsWith('http')) return;
+
+  // Navigation requests & root HTML page — Network first, fallback to cached copy
+  const isNav = event.request.mode === 'navigate' || url.pathname === '/' || url.pathname === '/index.html';
+  if (isNav) {
+    event.respondWith(
+      fetch(event.request)
+        .then((response) => {
+          if (response.ok) {
+            const clone = response.clone();
+            caches.open(CACHE_NAME).then((cache) => cache.put(event.request, clone));
+          }
+          return response;
+        })
+        .catch(() => caches.match(event.request) || caches.match('/index.html'))
+    );
+    return;
+  }
 
   // API calls (weather, AQI, geocoding) — network first, fallback to cache
   const isAPI = url.hostname.includes('open-meteo.com') ||
@@ -58,7 +75,6 @@ self.addEventListener('fetch', (event) => {
     event.respondWith(
       fetch(event.request)
         .then((response) => {
-          // Cache a copy of the successful API response
           const clone = response.clone();
           caches.open(CACHE_NAME).then((cache) => cache.put(event.request, clone));
           return response;
@@ -87,7 +103,6 @@ self.addEventListener('fetch', (event) => {
     caches.match(event.request).then((cached) => {
       if (cached) return cached;
       return fetch(event.request).then((response) => {
-        // Cache new static assets
         if (response.ok) {
           const clone = response.clone();
           caches.open(CACHE_NAME).then((cache) => cache.put(event.request, clone));
@@ -95,7 +110,6 @@ self.addEventListener('fetch', (event) => {
         return response;
       });
     }).catch(() => {
-      // Fallback for navigation requests — serve cached index.html
       if (event.request.mode === 'navigate') {
         return caches.match('/index.html');
       }
