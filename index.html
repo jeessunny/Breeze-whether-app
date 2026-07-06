@@ -771,7 +771,7 @@ const MapHero=({isDark,coords,activeLocation,lowSig,onDisableLowSig})=>{
         }}>
           <I.Wifi0 s={28} c="rgba(255,255,255,0.5)"/>
           <span style={{fontSize:"13px",fontWeight:600,color:"rgba(255,255,255,0.8)"}}>You are offline</span>
-          <span style={{fontSize:"11px",color:"rgba(255,255,255,0.45)",textAlign:"center",maxWidth:"180px",lineHeight:"1.5"}}>Turn on the internet to load the map</span>
+          <span style={{fontSize:"11px",color:"rgba(255,255,255,0.45)",textAlign:"center",maxWidth:"220px",lineHeight:"1.5"}}>Turn on the internet to load the map and get new weather updates</span>
         </div>
       )}
     </div>
@@ -1396,7 +1396,7 @@ const PanelHeader=({title,subtitle,onBack,backIcon})=>(
 ═══════════════════════════════════════════════════════ */
 const THEME_OPTS=[{id:"light",icon:"☀️",label:"Light"},{id:"system",icon:"⚙️",label:"System"},{id:"dark",icon:"🌙",label:"Dark"}];
 
-const SettingsPanel=({open,onClose,imp,setImp,lowSig,setLowSig,themePref,setThemePref,notifPerm,onRequestNotif,geoState})=>{
+const SettingsPanel=({open,onClose,imp,setImp,lowSig,setLowSig,themePref,setThemePref,notifPerm,onRequestNotif,geoState,locationEnabled,onToggleLocation})=>{
   const [showLegal,setShowLegal]=useState(false);
   if(!open) return null;
 
@@ -1444,10 +1444,15 @@ const SettingsPanel=({open,onClose,imp,setImp,lowSig,setLowSig,themePref,setThem
               }
             }}/>} />
             
-          <Cat c="System Status"/>
-          <Row Icon={I.Pin} title="Location Permission" 
-            sub={geoState==="got" ? "Location active" : "Location denied — using last location"}
-            right={<div style={{width:"8px",height:"8px",borderRadius:"50%",background:geoState==="got"?"#22c55e":"#ef4444"}}/>} />
+          <Cat c="Location"/>
+          <Row Icon={I.Pin} title="Location Access"
+            sub={locationEnabled?(geoState==="got"?"Location active":"Requesting location…"):"Disabled — using last known location"}
+            right={<Toggle on={locationEnabled} onChange={onToggleLocation}/>} />
+          {!locationEnabled&&(
+            <div style={{padding:"10px 14px",borderRadius:"12px",background:"rgba(239,68,68,0.1)",border:"1px solid rgba(239,68,68,0.2)",marginBottom:"6px"}}>
+              <span style={{fontSize:"11.5px",color:"#fca5a5",lineHeight:"1.5"}}>Location is turned off. Enable the toggle above to get weather for your current location.</span>
+            </div>
+          )}
             
           <Cat c="About"/>
           <div onClick={()=>setShowLegal(true)} style={{cursor:"pointer"}}>
@@ -1523,6 +1528,13 @@ const App=()=>{
   const [searchError,setSearchError]=useState(null);
   const didSearchRef = useRef(false);
 
+  // Location toggle state — persisted
+  const [locationEnabled,setLocationEnabled]=useState(()=>{
+    const saved=localStorage.getItem("bz_location_enabled");
+    return saved!==null?saved==="true":true; // default ON
+  });
+  useEffect(()=>{ localStorage.setItem("bz_location_enabled",locationEnabled); },[locationEnabled]);
+
   useEffect(()=>{ localStorage.setItem("bz_imp",imp); },[imp]);
   useEffect(()=>{ localStorage.setItem("bz_theme",themePref); },[themePref]);
   useEffect(()=>{ localStorage.setItem("bz_lowsig",lowSig); },[lowSig]);
@@ -1586,13 +1598,13 @@ const App=()=>{
         setWeatherLoading(false);
         if (isManual) {
           if (err.code === 1) {
-            setSearchError("Location access blocked. Tap the lock/settings icon in the address bar, enable Location permission, and refresh the page.");
+            setSearchError("Location access denied. Open Settings (⚙️) and turn on the Location toggle, or allow location in your browser's site settings.");
           } else if (err.code === 2) {
             setSearchError("Location unavailable. Please check your device's GPS or connection.");
           } else if (err.code === 3) {
             setSearchError("Location request timed out. Please try again.");
           } else {
-            setSearchError("Location access denied or unavailable.");
+            setSearchError("Location access denied. Open Settings (⚙️) and turn on the Location toggle.");
           }
         }
       },
@@ -1600,9 +1612,22 @@ const App=()=>{
     );
   }, []);
 
+  // Toggle location on/off from Settings
+  const handleToggleLocation = useCallback((on)=>{
+    setLocationEnabled(on);
+    if(on){
+      didSearchRef.current=false;
+      setSearchError(null);
+      fetchGeoLocation(true);
+    } else {
+      setGeoState("denied");
+    }
+  },[fetchGeoLocation]);
+
   useEffect(() => {
-    fetchGeoLocation(false);
-  }, [fetchGeoLocation]);
+    if(locationEnabled) fetchGeoLocation(false);
+    else { setGeoState("denied"); setWeatherLoading(false); }
+  }, [fetchGeoLocation, locationEnabled]);
 
   useEffect(()=>{
     if (geoState === "pending") return;
@@ -1795,7 +1820,7 @@ const App=()=>{
         </div>
       </div>
 
-      <SettingsPanel open={settOpen} onClose={()=>setSettOpen(false)} imp={imp} setImp={setImp} lowSig={lowSig} setLowSig={setLowSig} themePref={themePref} setThemePref={setThemePref} geoState={geoState}/>
+      <SettingsPanel open={settOpen} onClose={()=>setSettOpen(false)} imp={imp} setImp={setImp} lowSig={lowSig} setLowSig={setLowSig} themePref={themePref} setThemePref={setThemePref} geoState={geoState} locationEnabled={locationEnabled} onToggleLocation={handleToggleLocation}/>
     </div>
   );
 };
